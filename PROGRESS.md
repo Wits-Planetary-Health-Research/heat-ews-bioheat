@@ -53,6 +53,10 @@ C16 activations (ERA5 RMMCH cell, SOP P95): 1.2 events per season over 1991-2020
 
 **Iter 11 (20:20).** Drafted reply-all to Ijeoma and Nic in Outlook (cc Sam, Matthew), left unsent for Craig. It gives the D1 table and asks Q3, Q4, Q6, Q7. The Friday line is highlighted for Craig to check. Scheduled this session to resume at 02:20 SAST for C6, C7, C15.
 
+**Iter 12 (20:45 to 21:00).** With Craig's OK: created Wits-Planetary-Health-Research/heat-ews-bioheat, made it public (Pages needs public on the free plan), installed the Claude GitHub app on the org for this repo only, pushed. Added SMTP_USER secret; SMTP_PASSWORD form left open for Craig. Pages source set to GitHub Actions. Made mail failures non-fatal (new test, 25 pass).
+
+**Iter 13 (20:59).** First live run on GitHub Actions: ECMWF IFS ensemble, 51 members, fetched 18:59 UTC. Status No alert; 27% of members show a heatwave in days 8 to 14; not yet bias-corrected. Page live at https://wits-planetary-health-research.github.io/heat-ews-bioheat/ and checked by eye: status, chart, threshold step at 1 Nov (32.1 to 32.3), day table. C6 source and access logged on the page and in docs/runs.csv. Started the rebuild workflow on GitHub (own Open-Meteo quota) to fit the bias correction and run the hindcast.
+
 ## Findings Craig should see
 
 - The SOP's 2016-2019 thresholds are 1 to 2.6 °C above the 1991-2020 normal from October to January (Jan P95 32.6 vs 30.0). On them, about half of past warm seasons had no qualifying heatwave.
