@@ -3,9 +3,21 @@
 
 PY ?= python3
 
-.PHONY: all install era5 thresholds bias test run clean
+.PHONY: all install era5 stations thresholds validate bias test run clean
 
-all: install era5 thresholds bias test run
+all: install era5 stations thresholds bias validate test run
+
+GHCN = https://www.ncei.noaa.gov/data/global-historical-climatology-network-daily/access
+
+# SAWS Johannesburg International (68368) daily Tmax from NOAA GHCN-Daily
+stations:
+	mkdir -p data/stations
+	curl -sSf -o data/stations/SFM00068368.csv $(GHCN)/SFM00068368.csv
+
+# Station comparison, activations per season and hindcast skill
+validate:
+	$(PY) scripts/station_compare.py
+	$(PY) scripts/hindcast.py
 
 install:
 	$(PY) -m pip install -r requirements.txt
