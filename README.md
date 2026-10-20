@@ -37,7 +37,7 @@ To run it straight away, go to Actions, pick "Daily heat alert" and press "Run w
 
 - The page says "System not updated": the forecast service didn't answer. It normally sorts itself out by the next day. If it lasts more than 2 days, check the Actions tab for the error.
 - No new page for a day or more: GitHub may have paused the schedule. This happens after 60 days with no commits on the repo. Open Actions and re-enable the workflow.
-- Emails stopped: check the `SMTP_*` secrets under Settings, Secrets and variables, Actions.
+- Emails stopped: check the secrets under Settings, Secrets and variables, Actions. `SMTP_USER` is the Gmail address and the Gmail app password is stored as `EWS_RH` (a secret called `SMTP_PASSWORD` would take priority).
 
 ## How it works
 

@@ -36,7 +36,7 @@ jobs:
           SMTP_HOST: ${{ secrets.SMTP_HOST || 'smtp.gmail.com' }}
           SMTP_PORT: ${{ secrets.SMTP_PORT || '587' }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD || secrets.EWS_RH }}   # the Gmail app password is stored as EWS_RH
           SMTP_FROM: ${{ secrets.SMTP_FROM || secrets.SMTP_USER }}
           HEATEWS_PAGE_URL: ${{ vars.HEATEWS_PAGE_URL }}
           HEATEWS_TEST: ${{ inputs.test_email && '1' || '0' }}
