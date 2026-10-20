@@ -17,13 +17,13 @@ Goal file: GOAL.md (version 2). Session 1 started 20 Oct 2026, 19:45 SAST.
 | 9 | Strict-above, run length config | **pass** | `tests/test_alert.py` |
 | 10 | Warning/Watch cut-offs config | **pass** | `tests/test_alert.py::test_watch_needs_member_fraction` |
 | 11 | SOP worked-example and edge-case tests | **pass** | 14 tests in `tests/test_alert.py` |
-| 12 | Page | built | sample render checked (iter 9); needs a live run |
-| 13 | Email on change, test address | built | logic tested with a stub; needs SMTP account and test address |
-| 14 | Daily schedule, 7 runs | built | `.github/workflows/daily.yml`; needs the repo |
+| 12 | Page | **pass** | live page checked by eye (iter 13); 375 px frame: no page overflow, chart fits, table scrolls in its box; chart text enlarged (iter 16) |
+| 13 | Email on change, test address | waiting on Craig | SMTP_USER set; SMTP_PASSWORD (Gmail app password) still to add; test address Craig.Parker@witsphr.org |
+| 14 | Daily schedule, 7 runs | running | schedule live from 21 Oct 07:13 SAST; 7 runs due by 27 Oct |
 | 15 | Hindcast scores by lead band | **pass** | iter 15, `outputs/hindcast_skill.csv`. Days 9 to 14 cannot be scored with open data |
 | 16 | Trust horizon and activations per season | **pass** | `outputs/validation_report.md` section 5 |
-| 17 | One-command rebuild, pinned | partial | clean checkout rebuilds all finished steps (iter 10); bias and run steps pending |
-| 18 | Repo in Wits PHR org, no secrets | blocked | needs Craig to approve creating the repo |
+| 17 | One-command rebuild, pinned | **pass** | rebuild workflow on a clean GitHub runner ran `make install era5 stations thresholds bias validate test` end to end (iter 14) |
+| 18 | Repo in Wits PHR org, no secrets | **pass** | Wits-Planetary-Health-Research/heat-ews-bioheat; credential scan of tracked files found nothing (iter 16) |
 | 19 | README test by outsider | open | README written |
 | 20 | Independent review | open | |
 
@@ -62,6 +62,8 @@ C15 first pass looked weak (days 1-3 hit rate 0.22, FAR 0.60). The scoring took 
 
 **Iter 15 (21:50).** Hot-day check showed the real issue: on days ERA5 was above the threshold, quantile-mapped forecasts were 2.0 to 2.9 °C too cold (raw 1.1 to 2.0). Compared four corrections on the archive (`scripts/compare_corrections.py`): mean shift keeps hot days within 0.3 °C on average with the same overall MAE. Switched to mean shift (config `bias.method`), 26 tests pass. Hindcast with mean shift, same-window scoring: days 1-3 hit rate 0.67 (10/15), FAR 0.58; days 4-7 0.75 (15/20), FAR 0.66; day 8 0.57, FAR 0.82. Wrote `outputs/validation_report.md` (D6).
 
+**Iter 16 (22:05).** C12 phone check on the live page in a 375 px frame. Chart text was too small, so enlarged it and labelled every other date. C18 credential scan clean. Cancelled the 02:20 resume, which wasn't needed once GitHub ran the forecast steps.
+
 ## Findings Craig should see
 
 - Warnings will over-call: more than half of Warnings in days 1 to 7 won't meet the SOP definition, though they usually come close. Suggest Warning triggers preparation and the next day's run confirms activation. Worth putting to Ijeoma.
@@ -86,8 +88,8 @@ C15 first pass looked weak (days 1-3 hit rate 0.22, FAR 0.60). The scoring took 
 
 ## Blockers
 
-- C6, C7, C15: Open-Meteo quota for this connection resets around 02:00 SAST. A scheduled resume is set.
 - C5 (Davis part): Vital Weather export or API login (Q6).
-- C13: an SMTP sending account and a test address. Nothing goes to real recipients without Craig.
-- C14, C18: a repo in the Wits PHR GitHub org. Craig to approve creating it.
+- C13: Gmail app password as the SMTP_PASSWORD secret (Craig). Real recipients only after Craig approves.
+- C14: time. Seven scheduled runs, 21 to 27 Oct.
+- C20: independent review, to run once C13 passes.
 - C19: a person outside the build team to follow the README.
