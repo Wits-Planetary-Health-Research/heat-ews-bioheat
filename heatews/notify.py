@@ -18,8 +18,15 @@ def recipients(cfg, test=False, env=os.environ):
     return lst or list(cfg["notify"]["test_recipients" if test else "recipients"] or [])
 
 
-def should_send(prev, now, mode="on_change"):
+def should_send(prev, now, mode="on_change", today=None, daily_until=None):
+    """mode: on_change (only when the status changes), alerts (on change, and every day while there is a
+    Watch or Warning), daily_digest (every day). daily_until (a date) forces a daily email up to and
+    including that day, whatever the mode."""
+    if daily_until is not None and today is not None and today <= daily_until:
+        return True
     if mode == "daily_digest":
+        return True
+    if mode == "alerts" and now in (A.WARNING, A.WATCH):
         return True
     return prev != now
 

@@ -61,7 +61,9 @@ def main(cfg=None, fetcher=forecast.fetch, now=None):
     test = os.environ.get("HEATEWS_TEST") == "1"
     recipients = notify.recipients(cfg, test)
     email = "not needed"
-    if notify.should_send(prev.get("status"), result["status"], cfg["notify"]["mode"]) or test:
+    du = cfg["notify"].get("daily_until")
+    du = pd.Timestamp(du).date() if du else None
+    if notify.should_send(prev.get("status"), result["status"], cfg["notify"]["mode"], now.date(), du) or test:
         email = notify.send(notify.compose(result, issued, PAGE_URL, site["name"]), recipients)
 
     state = {"status": result["status"], "issued": issued, "last_good": last_good,

@@ -18,7 +18,7 @@ A heatwave is daily maximum temperature **above** the monthly 95th percentile (S
 ## Where to see it
 
 - The page: GitHub Pages for this repo (link in the repo's About box). It shows today's status, a 14-day chart against the threshold and a day-by-day table.
-- Email: sent when the status changes, to the people in `config.yaml`.
+- Email: every morning until 27 Oct 2026 (first week). After that, on days with a Watch or Warning and whenever the status changes. Set by `notify.mode` and `notify.daily_until` in `config.yaml`.
 
 ## Change something
 

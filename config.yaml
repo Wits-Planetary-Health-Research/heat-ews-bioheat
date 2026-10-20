@@ -50,7 +50,12 @@ forecast:
   horizon_days: 14
 
 notify:
-  mode: on_change         # on_change or daily_digest. Q7
+  # on_change: only when the status changes
+  # alerts: on change, and every day while there is a Watch or Warning
+  # daily_digest: every day
+  mode: alerts
+  # Daily email for everyone up to and including this date (first week), then `mode` applies
+  daily_until: 2026-10-27
   # Addresses live in the GitHub secrets HEATEWS_RECIPIENTS and HEATEWS_TEST_RECIPIENTS
   # (comma-separated) so they are not public. These lists are only a fallback.
   recipients: []

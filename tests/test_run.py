@@ -87,3 +87,16 @@ def test_recipients_from_secret_env():
     assert notify.recipients(cfg, False, env) == ["a@x.org", "b@x.org", "c@x.org"]
     assert notify.recipients(cfg, True, env) == ["t@x.org"]
     assert notify.recipients(cfg, False, {}) == []
+
+
+def test_email_modes():
+    from datetime import date
+    from heatews import notify
+    d = date(2026, 10, 25)
+    assert notify.should_send("Watch", "Watch", "alerts", d, date(2026, 10, 27))      # first week: daily
+    assert notify.should_send("No alert", "No alert", "alerts", d, date(2026, 10, 27))
+    later = date(2026, 11, 1)
+    assert not notify.should_send("No alert", "No alert", "alerts", later, date(2026, 10, 27))
+    assert notify.should_send("Watch", "Watch", "alerts", later, date(2026, 10, 27))   # alert day
+    assert notify.should_send("Watch", "No alert", "alerts", later, None)              # change
+    assert not notify.should_send("Watch", "Watch", "on_change", later, None)
