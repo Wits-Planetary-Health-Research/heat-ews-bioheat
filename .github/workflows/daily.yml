@@ -40,6 +40,8 @@ jobs:
           SMTP_FROM: ${{ secrets.SMTP_FROM || secrets.SMTP_USER }}
           HEATEWS_PAGE_URL: ${{ vars.HEATEWS_PAGE_URL }}
           HEATEWS_TEST: ${{ inputs.test_email && '1' || '0' }}
+          HEATEWS_RECIPIENTS: ${{ secrets.HEATEWS_RECIPIENTS }}
+          HEATEWS_TEST_RECIPIENTS: ${{ secrets.HEATEWS_TEST_RECIPIENTS || secrets.SMTP_USER }}
         run: python -m heatews.run
       - name: Save status and run log
         run: |

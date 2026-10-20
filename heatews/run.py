@@ -59,7 +59,7 @@ def main(cfg=None, fetcher=forecast.fetch, now=None):
     (DOCS / "index.html").write_text(html)
 
     test = os.environ.get("HEATEWS_TEST") == "1"
-    recipients = cfg["notify"]["test_recipients" if test else "recipients"]
+    recipients = notify.recipients(cfg, test)
     email = "not needed"
     if notify.should_send(prev.get("status"), result["status"], cfg["notify"]["mode"]) or test:
         email = notify.send(notify.compose(result, issued, PAGE_URL, site["name"]), recipients)

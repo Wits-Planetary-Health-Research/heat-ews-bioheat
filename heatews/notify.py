@@ -1,13 +1,21 @@
 """Email on status change. SMTP settings come from environment variables (GitHub Actions secrets):
 SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM. Nothing is stored in the repo.
 
-Recipients: config notify.recipients (real) or notify.test_recipients (used when HEATEWS_TEST=1).
+Recipients: the HEATEWS_RECIPIENTS secret (comma-separated), or HEATEWS_TEST_RECIPIENTS when HEATEWS_TEST=1.
+Addresses are kept out of config.yaml because the repo is public. Config lists are a fallback.
 """
 from email.message import EmailMessage
 import os
 import smtplib
 
 from . import alert as A
+
+
+def recipients(cfg, test=False, env=os.environ):
+    key = "HEATEWS_TEST_RECIPIENTS" if test else "HEATEWS_RECIPIENTS"
+    raw = env.get(key, "")
+    lst = [a.strip() for a in raw.replace(";", ",").split(",") if a.strip()]
+    return lst or list(cfg["notify"]["test_recipients" if test else "recipients"] or [])
 
 
 def should_send(prev, now, mode="on_change"):

@@ -78,3 +78,12 @@ def test_email_failure_does_not_crash():
     assert notify.send(EmailMessage(), ["a@b.c"], env={"SMTP_HOST": "smtp.gmail.com"}) == "SMTP credentials not set"
     r = notify.send(EmailMessage(), ["a@b.c"], env={"SMTP_HOST": "127.0.0.1", "SMTP_PORT": "1", "SMTP_USER": "x", "SMTP_PASSWORD": "y"})
     assert r.startswith("email failed")
+
+
+def test_recipients_from_secret_env():
+    from heatews import notify
+    cfg = config.load()
+    env = {"HEATEWS_RECIPIENTS": "a@x.org, b@x.org;c@x.org", "HEATEWS_TEST_RECIPIENTS": "t@x.org"}
+    assert notify.recipients(cfg, False, env) == ["a@x.org", "b@x.org", "c@x.org"]
+    assert notify.recipients(cfg, True, env) == ["t@x.org"]
+    assert notify.recipients(cfg, False, {}) == []

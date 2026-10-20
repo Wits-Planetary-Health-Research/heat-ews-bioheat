@@ -24,14 +24,14 @@ A heatwave is daily maximum temperature **above** the monthly 95th percentile (S
 
 Everything you'd want to change is in `config.yaml`. Edit it on GitHub (pencil icon), then commit. The next run picks it up.
 
-- Add or remove an email recipient: edit `notify.recipients`. One address per line, like `- name@witsphr.org`.
+- Add or remove an email recipient: the list is the `HEATEWS_RECIPIENTS` secret (Settings, Secrets and variables, Actions), comma-separated. GitHub doesn't show a secret's value, so click the pencil and paste the whole new list. Addresses aren't kept in `config.yaml` because the repo is public.
 - Change the run length: `alert.run_length_days` (SOP says 2).
 - Switch from P95 to P90: set `thresholds.percentile: 90`. With `use_sop_table: true` it uses the Appendix 1 P90 column.
 - Use thresholds computed from a different period: set `use_sop_table: false` and set `reference_period`, for example `[1991, 2020]`. You'll need to rerun `make era5` first.
 - Count a day exactly at the threshold as hot: `alert.comparison: inclusive`.
 - Change the Watch cut-off: `alert.watch_member_fraction` (0.5 is half the members).
 
-To run it straight away, go to Actions, pick "Daily heat alert" and press "Run workflow". Tick "test email" to send only to `notify.test_recipients`.
+To run it straight away, go to Actions, pick "Daily heat alert" and press "Run workflow". Tick "test email" to send only to `HEATEWS_TEST_RECIPIENTS` (falls back to the sending Gmail address).
 
 ## If it stops
 

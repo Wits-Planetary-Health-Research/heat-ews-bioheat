@@ -51,7 +51,7 @@ forecast:
 
 notify:
   mode: on_change         # on_change or daily_digest. Q7
-  # Real recipients are only added after Craig approves.
+  # Addresses live in the GitHub secrets HEATEWS_RECIPIENTS and HEATEWS_TEST_RECIPIENTS
+  # (comma-separated) so they are not public. These lists are only a fallback.
   recipients: []
-  test_recipients:
-    - Craig.Parker@witsphr.org
+  test_recipients: []
