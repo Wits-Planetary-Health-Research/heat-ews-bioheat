@@ -11,8 +11,8 @@ Goal file: GOAL.md (version 2). Session 1 started 20 Oct 2026, 19:45 SAST.
 | 3 | D1 table, both periods, independent recompute 0.1 °C | **pass** | iter 7, `scripts/compare_recompute.py` |
 | 4 | Config-driven thresholds, percentile/window unit test | **pass** | `tests/test_thresholds.py` |
 | 5 | Station comparison | partial | SAWS done (iter 8). On-site Davis blocked on Q6 |
-| 6 | ECMWF ensemble from open source, logged | built, not yet run | Open-Meteo daily quota exhausted for this connection until 02:00 SAST |
-| 7 | Bias correction by lead, tested held-out | built, not yet run | same |
+| 6 | ECMWF ensemble from open source, logged | **pass** | iter 13: 51 members, source and fetch time on page and in docs/runs.csv |
+| 7 | Bias correction by lead, tested held-out | **pass** | iter 14, `outputs/bias_holdout.csv` |
 | 8 | "System not updated" on failed fetch, tested | **pass** | `tests/test_run.py::test_failed_fetch_never_shows_no_alert` |
 | 9 | Strict-above, run length config | **pass** | `tests/test_alert.py` |
 | 10 | Warning/Watch cut-offs config | **pass** | `tests/test_alert.py::test_watch_needs_member_fraction` |
@@ -56,6 +56,9 @@ C16 activations (ERA5 RMMCH cell, SOP P95): 1.2 events per season over 1991-2020
 **Iter 12 (20:45 to 21:00).** With Craig's OK: created Wits-Planetary-Health-Research/heat-ews-bioheat, made it public (Pages needs public on the free plan), installed the Claude GitHub app on the org for this repo only, pushed. Added SMTP_USER secret; SMTP_PASSWORD form left open for Craig. Pages source set to GitHub Actions. Made mail failures non-fatal (new test, 25 pass).
 
 **Iter 13 (20:59).** First live run on GitHub Actions: ECMWF IFS ensemble, 51 members, fetched 18:59 UTC. Status No alert; 27% of members show a heatwave in days 8 to 14; not yet bias-corrected. Page live at https://wits-planetary-health-research.github.io/heat-ews-bioheat/ and checked by eye: status, chart, threshold step at 1 Nov (32.1 to 32.3), day table. C6 source and access logged on the page and in docs/runs.csv. Started the rebuild workflow on GitHub (own Open-Meteo quota) to fit the bias correction and run the hindcast.
+
+**Iter 14 (21:25).** Rebuild workflow on GitHub (clean machine): make install era5 stations thresholds bias validate test all passed and committed data/bias_mapping.json. C7 held-out (train 2024/25, test 2025/26 warm season, 242 days per lead): raw IFS runs about 1 °C cold at every lead (bias -0.7 to -1.4). Quantile mapping: bias within ±0.35 °C and lower MAE at every lead (day 1 1.35 to 0.82, day 4 1.76 to 1.47, day 8 2.45 to 2.05). **PASS.**
+C15 first pass looked weak (days 1-3 hit rate 0.22, FAR 0.60). The scoring took observed heatwaves from the full record but forecast ones from the 8-day window, which penalises runs already under way on the issue day. Rescoring on the same window, plus a tolerant score and a hot-day error check; the forecast archive is now committed so this can run locally. Rerunning on GitHub.
 
 ## Findings Craig should see
 
