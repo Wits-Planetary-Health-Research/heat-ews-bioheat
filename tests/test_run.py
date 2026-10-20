@@ -70,3 +70,11 @@ def test_email_only_on_change(tmp_docs, monkeypatch):
     v[2] = v[3] = 34
     run.main(fetcher=fake(v), now=NOW)                  # change to Warning
     assert len(sent) == 2 and sent[-1].endswith("Warning")
+
+
+def test_email_failure_does_not_crash():
+    from heatews import notify
+    from email.message import EmailMessage
+    assert notify.send(EmailMessage(), ["a@b.c"], env={"SMTP_HOST": "smtp.gmail.com"}) == "SMTP credentials not set"
+    r = notify.send(EmailMessage(), ["a@b.c"], env={"SMTP_HOST": "127.0.0.1", "SMTP_PORT": "1", "SMTP_USER": "x", "SMTP_PASSWORD": "y"})
+    assert r.startswith("email failed")

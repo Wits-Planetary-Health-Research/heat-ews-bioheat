@@ -40,11 +40,16 @@ def send(msg, recipients, env=os.environ):
     host = env.get("SMTP_HOST")
     if not host:
         return "SMTP not configured"
-    msg["From"] = env.get("SMTP_FROM", env.get("SMTP_USER", ""))
+    if not env.get("SMTP_USER") or not env.get("SMTP_PASSWORD"):
+        return "SMTP credentials not set"
+    msg["From"] = env.get("SMTP_FROM") or env["SMTP_USER"]
     msg["To"] = ", ".join(recipients)
-    with smtplib.SMTP(host, int(env.get("SMTP_PORT", 587)), timeout=60) as s:
-        s.starttls()
-        if env.get("SMTP_USER"):
+    try:
+        with smtplib.SMTP(host, int(env.get("SMTP_PORT") or 587), timeout=60) as s:
+            s.starttls()
             s.login(env["SMTP_USER"], env["SMTP_PASSWORD"])
-        s.send_message(msg)
+            s.send_message(msg)
+    except (smtplib.SMTPException, OSError) as e:
+        # A mail failure must never stop the page from updating
+        return f"email failed: {type(e).__name__}: {e}"
     return f"sent to {len(recipients)}"
