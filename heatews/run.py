@@ -40,8 +40,9 @@ def main(cfg=None, fetcher=forecast.fetch, now=None):
         keep = (dates >= today)
         dates, raw = dates[keep][:horizon], raw[:, keep][:, :horizon]
         if MAPPING.exists():
-            members = bias.Mapping.load(MAPPING).correct_ensemble(raw)
-            source += "; bias-corrected to ERA5 by lead (quantile mapping)"
+            method = cfg.get("bias", {}).get("method", "mean_shift")
+            members = bias.Mapping.load(MAPPING, method).correct_ensemble(raw)
+            source += f"; bias-corrected to ERA5 by lead ({method.replace('_', ' ')})"
         else:
             members = raw
             source += "; NOT bias-corrected (mapping file missing)"

@@ -23,6 +23,7 @@ fc = bias.fetch_previous_runs(lat, lon, "2024-03-01", str(end))
 train = fc[(fc.date >= "2024-09-01") & (fc.date <= "2025-04-30")]
 test = fc[(fc.date >= "2025-09-01") & (fc.date <= "2026-04-30")]
 m = bias.Mapping.fit(train, obs)
+m.method = "quantile_mapping"  # both methods are scored below
 t = test.merge(obs.rename(columns={"tmax": "obs"}), on="date")
 t = t[t.date.dt.month.isin(bias.WARM)]
 rows = []
@@ -42,8 +43,8 @@ r = pd.DataFrame(rows)
 (ROOT / "outputs").mkdir(exist_ok=True)
 r.to_csv(ROOT / "outputs" / "bias_holdout.csv", index=False)
 print(r.to_string(index=False))
-improved = (r.qm_mae <= r.raw_mae).all() and (r.qm_bias.abs() <= r.raw_bias.abs() + 0.05).all()
-print("Held-out test:", "PASS (quantile mapping no worse than raw at every lead)" if improved else "CHECK")
+improved = (r.shift_mae <= r.raw_mae).all() and (r.shift_bias.abs() <= r.raw_bias.abs() + 0.05).all()
+print("Held-out test (mean shift, the method in use):", "PASS (no worse than raw at every lead)" if improved else "CHECK")
 
 full = fc[fc.date.dt.month.isin(bias.WARM)]
 bias.Mapping.fit(full, obs).save(ROOT / "data" / "bias_mapping.json")

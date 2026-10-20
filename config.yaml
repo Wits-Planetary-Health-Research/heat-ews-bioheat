@@ -40,6 +40,10 @@ alert:
   watch_member_fraction: 0.5   # Q9
   min_members: 40              # fewer than this counts as an incomplete fetch
 
+bias:
+  # mean_shift (default) or quantile_mapping. Mean shift keeps hot days hot; see outputs/correction_comparison.csv
+  method: mean_shift
+
 forecast:
   source: open-meteo-ensemble
   model: ecmwf_ifs025

@@ -56,8 +56,11 @@ def fetch_previous_runs(lat, lon, start, end, model="ecmwf_ifs025", leads=range(
 class Mapping:
     """Per-lead empirical quantile mapping. Outside the training range, a constant shift is applied."""
 
-    def __init__(self, table=None):
+    def __init__(self, table=None, method="mean_shift"):
         self.table = table or {}
+        # mean_shift is the default: quantile mapping fixed the overall distribution but made hot days
+        # colder (it cannot fix the forecast's conditional bias), see outputs/correction_comparison.csv
+        self.method = method
 
     @classmethod
     def fit(cls, fc, obs, leads=range(0, 8), months=WARM):
@@ -73,8 +76,10 @@ class Mapping:
     def correct(self, values, lead):
         lead = min(max(self.table), max(min(self.table), lead))
         t = self.table[lead]
-        fq, oq = np.array(t["fq"]), np.array(t["oq"])
         v = np.asarray(values, dtype=float)
+        if self.method == "mean_shift":
+            return v + t["mean_shift"]
+        fq, oq = np.array(t["fq"]), np.array(t["oq"])
         out = np.interp(v, fq, oq)
         lo, hi = v < fq[0], v > fq[-1]
         out[lo] = v[lo] + (oq[0] - fq[0])
@@ -90,5 +95,5 @@ class Mapping:
         path.write_text(json.dumps({str(k): v for k, v in self.table.items()}, indent=1))
 
     @classmethod
-    def load(cls, path):
-        return cls({int(k): v for k, v in json.loads(path.read_text()).items()})
+    def load(cls, path, method="mean_shift"):
+        return cls({int(k): v for k, v in json.loads(path.read_text()).items()}, method)

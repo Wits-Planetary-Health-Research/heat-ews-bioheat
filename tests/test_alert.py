@@ -100,3 +100,14 @@ def test_some_missing_members_still_runs():
 
 def test_short_horizon_reports_not_updated():
     assert A.status(_ens([25] * 10), [JAN] * 10, CFG)["status"] == A.NOT_UPDATED
+
+
+def test_bias_methods():
+    from heatews import bias
+    t = {k: {"fq": [20.0, 30.0], "oq": [21.0, 29.0], "mean_shift": 1.2, "n": 10} for k in range(8)}
+    ms = bias.Mapping(t)
+    assert ms.correct([33.0], 0)[0] == pytest.approx(34.2)
+    assert ms.correct([33.0], 12)[0] == pytest.approx(34.2)  # beyond lead 7 reuses lead 7
+    qm = bias.Mapping(t, "quantile_mapping")
+    assert qm.correct([25.0], 0)[0] == pytest.approx(25.0)
+    assert qm.correct([32.0], 0)[0] == pytest.approx(31.0)  # above training range: constant top shift

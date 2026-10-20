@@ -3,8 +3,8 @@
 Part A (activations): ERA5 at RMMCH 1991 to latest, SOP thresholds, count heatwave events and days per
 warm season (Sept to April).
 
-Part B (skill): past ECMWF IFS 0.25 forecasts (Open-Meteo Previous Runs, leads 0 to 7), bias-corrected with
-a mapping trained on the other warm season (no leakage). For every issue day, does the forecast show a
+Part B (skill): past ECMWF IFS 0.25 forecasts (Open-Meteo Previous Runs, leads 0 to 7), bias-corrected
+(config bias.method) with a correction trained on the other warm season (no leakage). For every issue day, does the forecast show a
 heatwave day (SOP definition, run of 2) within the lead band, and does ERA5? Bands: days 1-3, 4-7, 8.
 No open archive of ECMWF forecasts beyond 8 days exists, so days 8 to 14 cannot be scored here.
 
@@ -61,6 +61,7 @@ for test_s, (t0, t1) in seasons.items():
     train_s = [s for s in seasons if s != test_s][0]
     tr0, tr1 = seasons[train_s]
     m = bias.Mapping.fit(fc[(fc.date >= tr0) & (fc.date <= tr1)], obs[["date", "tmax"]])
+    m.method = cfg.get("bias", {}).get("method", "mean_shift")
     fci = fc.set_index("date")
     for issue in pd.date_range(t0, t1, freq="D"):
         # Forecast series from the run issued on `issue`: day j (1..8) is target issue+j-1 at lead j-1
