@@ -1,0 +1,2 @@
+status,issued,last_good,reason,frac_watch_window,frac_warning_window,email
+No alert,"Tue 20 Oct 2026, 20:59 SAST","Tue 20 Oct 2026, 20:59 SAST",,0.27450980392156865,0.0,no recipients configured
