@@ -1,0 +1,5 @@
+source: https://previous-runs-api.open-meteo.com/v1/forecast
+model: ecmwf_ifs025
+accessed: 2026-10-20
+grid_lat: -26.25
+grid_lon: 28.0

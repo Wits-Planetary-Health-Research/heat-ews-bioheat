@@ -1,4 +1,10 @@
-band,issue_days,hits,misses,false_alarms,correct_negatives,hit_rate,false_alarm_ratio
-days 1-3,484.0,4.0,14.0,6.0,460.0,0.22,0.6
-days 4-7,484.0,7.0,13.0,12.0,452.0,0.35,0.63
-day 8,484.0,1.0,10.0,7.0,466.0,0.09,0.88
+scoring,band,issue_days,hits,misses,false_alarms,correct_negatives,hit_rate,false_alarm_ratio
+same window (primary),days 1-3,484.0,4.0,11.0,6.0,463.0,0.27,0.6
+same window (primary),days 4-7,484.0,7.0,13.0,12.0,452.0,0.35,0.63
+same window (primary),day 8,484.0,1.0,6.0,7.0,470.0,0.14,0.88
+observed from full record,days 1-3,484.0,4.0,14.0,6.0,460.0,0.22,0.6
+observed from full record,days 4-7,484.0,7.0,13.0,12.0,452.0,0.35,0.63
+observed from full record,day 8,484.0,1.0,10.0,7.0,466.0,0.09,0.88
+within 1 day (tolerant),days 1-3,484.0,4.0,11.0,9.0,460.0,0.27,0.69
+within 1 day (tolerant),days 4-7,484.0,7.0,13.0,12.0,452.0,0.35,0.63
+within 1 day (tolerant),day 8,484.0,1.0,6.0,9.0,468.0,0.14,0.9
