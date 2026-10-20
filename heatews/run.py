@@ -17,7 +17,7 @@ DOCS = ROOT / "docs"
 STATE = DOCS / "status.json"
 LOG = DOCS / "runs.csv"
 MAPPING = ROOT / "data" / "bias_mapping.json"
-PAGE_URL = os.environ.get("HEATEWS_PAGE_URL", "(page URL not set)")
+PAGE_URL = os.environ.get("HEATEWS_PAGE_URL") or "https://wits-planetary-health-research.github.io/heat-ews-bioheat/"
 
 
 def sast_now():

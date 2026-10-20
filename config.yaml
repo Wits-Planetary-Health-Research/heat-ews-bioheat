@@ -49,4 +49,5 @@ notify:
   mode: on_change         # on_change or daily_digest. Q7
   # Real recipients are only added after Craig approves.
   recipients: []
-  test_recipients: []
+  test_recipients:
+    - Craig.Parker@witsphr.org
