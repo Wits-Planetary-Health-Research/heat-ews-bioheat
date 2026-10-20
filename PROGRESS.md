@@ -22,7 +22,7 @@ Goal file: GOAL.md (version 2). Session 1 started 20 Oct 2026, 19:45 SAST.
 | 14 | Daily schedule, 7 runs | built | `.github/workflows/daily.yml`; needs the repo |
 | 15 | Hindcast scores by lead band | built, not yet run | needs forecast archive; days 8 to 14 cannot be scored with open data |
 | 16 | Trust horizon and activations per season | half done | activations done (iter 8); trust horizon needs C15 |
-| 17 | One-command rebuild, pinned | built | `make all`, `requirements.txt`; clean-checkout test pending |
+| 17 | One-command rebuild, pinned | partial | clean checkout rebuilds all finished steps (iter 10); bias and run steps pending |
 | 18 | Repo in Wits PHR org, no secrets | blocked | needs Craig to approve creating the repo |
 | 19 | README test by outsider | open | README written |
 | 20 | Independent review | open | |
@@ -48,6 +48,10 @@ P90 max |diff| 0.27 °C, mean +0.03. P95 max |diff| 0.22 °C, mean +0.05. **PASS
 C16 activations (ERA5 RMMCH cell, SOP P95): 1.2 events per season over 1991-2020, 14 of 29 seasons with none; 2.3 per season over 2020-2025. Alternatives in `outputs/activation_scenarios.csv`.
 
 **Iter 9 (20:10).** Rendered a sample page with a synthetic ensemble; chart checked visually (`outputs/sample_chart.png`). Wrote D1 note (`outputs/D1_note.md`).
+
+**Iter 10 (20:15).** C17: fresh `git clone` into scratch, then `make install era5 stations thresholds test validate`. ERA5 pulled from scratch, replication PASS (same numbers), recompute 0.0000 °C, 24 tests pass, station and activation outputs identical. The bias and run steps are still to do (Open-Meteo).
+
+**Iter 11 (20:20).** Drafted reply-all to Ijeoma and Nic in Outlook (cc Sam, Matthew), left unsent for Craig. It gives the D1 table and asks Q3, Q4, Q6, Q7. The Friday line is highlighted for Craig to check. Scheduled this session to resume at 02:20 SAST for C6, C7, C15.
 
 ## Findings Craig should see
 
