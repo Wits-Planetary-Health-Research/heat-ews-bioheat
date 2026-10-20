@@ -66,6 +66,8 @@ C15 first pass looked weak (days 1-3 hit rate 0.22, FAR 0.60). The scoring took 
 
 **Iter 17 (21:57).** Craig added the Gmail app password (saved as secret EWS_RH; workflow reads SMTP_PASSWORD or EWS_RH). Live run with bias correction now shows Watch: 61% of members have a heatwave in days 8 to 14, 6% in days 1 to 7. Test-email run: sent to 1 recipient.
 
+**Iter 18 (22:15).** Recipients moved out of public config into the HEATEWS_RECIPIENTS secret (Craig, Ijeoma, Nic, Sam, Matthew; addresses taken from Outlook contact cards). Craig added the secret. 27 tests pass.
+
 ## Findings Craig should see
 
 - Warnings will over-call: more than half of Warnings in days 1 to 7 won't meet the SOP definition, though they usually come close. Suggest Warning triggers preparation and the next day's run confirms activation. Worth putting to Ijeoma.
