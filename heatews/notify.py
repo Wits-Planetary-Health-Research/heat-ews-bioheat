@@ -1,0 +1,50 @@
+"""Email on status change. SMTP settings come from environment variables (GitHub Actions secrets):
+SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM. Nothing is stored in the repo.
+
+Recipients: config notify.recipients (real) or notify.test_recipients (used when HEATEWS_TEST=1).
+"""
+from email.message import EmailMessage
+import os
+import smtplib
+
+from . import alert as A
+
+
+def should_send(prev, now, mode="on_change"):
+    if mode == "daily_digest":
+        return True
+    return prev != now
+
+
+def compose(result, issued, page_url, site):
+    s = result["status"]
+    msg = EmailMessage()
+    msg["Subject"] = f"BioHEAT heat alert ({site}): {s}"
+    lines = [f"Status: {s}", f"Issued: {issued}", ""]
+    if s == A.WARNING:
+        lines.append("A heatwave (SOP-BH-13 definition) is forecast in the next 7 days. Please review and decide on activation.")
+    elif s == A.WATCH:
+        lines.append("A heatwave is possible in days 8 to 14. No action needed yet; keep an eye on the daily update.")
+    elif s == A.NO_ALERT:
+        lines.append("No heatwave is forecast in the next 14 days.")
+    else:
+        lines.append("Today's forecast could not be loaded. Please check the SAWS forecast manually today.")
+    lines += ["", f"Full forecast: {page_url}"]
+    msg.set_content("\n".join(lines))
+    return msg
+
+
+def send(msg, recipients, env=os.environ):
+    if not recipients:
+        return "no recipients configured"
+    host = env.get("SMTP_HOST")
+    if not host:
+        return "SMTP not configured"
+    msg["From"] = env.get("SMTP_FROM", env.get("SMTP_USER", ""))
+    msg["To"] = ", ".join(recipients)
+    with smtplib.SMTP(host, int(env.get("SMTP_PORT", 587)), timeout=60) as s:
+        s.starttls()
+        if env.get("SMTP_USER"):
+            s.login(env["SMTP_USER"], env["SMTP_PASSWORD"])
+        s.send_message(msg)
+    return f"sent to {len(recipients)}"

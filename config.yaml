@@ -1,0 +1,52 @@
+# Heat-EWS for BioHEAT. All tunable settings live here.
+
+site:
+  name: RMMCH
+  # Rahima Moosa Mother and Child Hospital, Coronationville. [CHECK] Q5
+  latitude: -26.176
+  longitude: 27.985
+  timezone: Africa/Johannesburg
+
+# Location used for the SOP-BH-13 Appendix 1 replication check only. [CHECK]
+replication_site:
+  name: Soweto
+  latitude: -26.25
+  longitude: 27.86
+
+reanalysis:
+  source: open-meteo-archive
+  model: era5            # ERA5 0.25 degree. Alternative: era5_land
+  variable: temperature_2m_max
+
+thresholds:
+  percentile: 95          # SOP-BH-13 uses P95. Q3
+  also_report: [90]
+  reference_period: [2016, 2019]   # SOP-BH-13 period. Q4. WMO normal is [1991, 2020]
+  kind: monthly           # monthly (SOP) or calendar_day
+  calendar_window_days: 15
+  # When true, use the published SOP-BH-13 Appendix 1 values as the operational thresholds
+  use_sop_table: true
+
+sop_appendix1:
+  # SOP-BH-13 Appendix 1, ERA5 Soweto 2016-2019, degrees C
+  p90: {1: 30.7, 2: 28.9, 3: 28.7, 4: 27.0, 5: 23.7, 6: 21.8, 7: 22.4, 8: 26.0, 9: 30.1, 10: 31.7, 11: 31.0, 12: 31.0}
+  p95: {1: 32.6, 2: 29.8, 3: 28.9, 4: 27.5, 5: 24.0, 6: 22.9, 7: 23.4, 8: 26.5, 9: 30.5, 10: 32.1, 11: 32.3, 12: 31.8}
+
+alert:
+  run_length_days: 2
+  comparison: strict      # strict (>) per SOP example, or inclusive (>=)
+  warning_days: [1, 7]
+  watch_days: [8, 14]
+  watch_member_fraction: 0.5   # Q9
+  min_members: 40              # fewer than this counts as an incomplete fetch
+
+forecast:
+  source: open-meteo-ensemble
+  model: ecmwf_ifs025
+  horizon_days: 14
+
+notify:
+  mode: on_change         # on_change or daily_digest. Q7
+  # Real recipients are only added after Craig approves.
+  recipients: []
+  test_recipients: []

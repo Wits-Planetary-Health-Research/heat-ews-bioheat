@@ -1,0 +1,8 @@
+data/era5/
+data/era5_ncar/
+data/stations/
+data/previous_runs/
+__pycache__/
+*.pyc
+.pytest_cache/
+outputs/sample_*
