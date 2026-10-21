@@ -19,7 +19,7 @@ Goal file: GOAL.md (version 2). Session 1 started 20 Oct 2026, 19:45 SAST.
 | 11 | SOP worked-example and edge-case tests | **pass** | 14 tests in `tests/test_alert.py` |
 | 12 | Page | **pass** | live page checked by eye (iter 13); 375 px frame: no page overflow, chart fits, table scrolls in its box; chart text enlarged (iter 16) |
 | 13 | Email on change, test address | sent, awaiting Craig's confirmation | test run 21:57 SAST: "sent to 1" (Craig.Parker@witsphr.org). Gmail app password stored as secret EWS_RH |
-| 14 | Daily schedule, 7 runs | running | schedule live from 21 Oct 07:13 SAST; 7 runs due by 27 Oct |
+| 14 | Daily schedule, 7 runs | running | external timer 07:05 SAST from 22 Oct (GitHub cron unreliable, kept as backup); 7 runs due by 28 Oct |
 | 15 | Hindcast scores by lead band | **pass** | iter 15, `outputs/hindcast_skill.csv`. Days 9 to 14 cannot be scored with open data |
 | 16 | Trust horizon and activations per season | **pass** | `outputs/validation_report.md` section 5 |
 | 17 | One-command rebuild, pinned | **pass** | rebuild workflow on a clean GitHub runner ran `make install era5 stations thresholds bias validate test` end to end (iter 14) |
@@ -69,6 +69,8 @@ C15 first pass looked weak (days 1-3 hit rate 0.22, FAR 0.60). The scoring took 
 **Iter 18 (22:15).** Recipients moved out of public config into the HEATEWS_RECIPIENTS secret (Craig, Ijeoma, Nic, Sam, Matthew; addresses taken from Outlook contact cards). Craig added the secret. 27 tests pass.
 
 **Iter 19 (21 Oct 08:50).** The 07:13 scheduled run did not fire on 21 Oct (no schedule event in the run list; workflow active). No emails went out. Added backup slots at 08:17 and 09:41 SAST with a same-day guard (30 tests pass). C14 run count restarts from the first scheduled run that fires.
+
+**Iter 20 (21 Oct 12:30).** Troubleshot the daily schedule. Evidence: on 21 Oct GitHub dropped the 07:13 and 08:17 SAST slots and ran the 09:41 slot at 12:07 (2.5 h late); a 5-minute probe workflow did not fire once in 30 minutes. Code, secrets and email all fine (manual runs succeed). Fix: cron-job.org POSTs to the workflow_dispatch API at 07:05 SAST daily with a fine-grained token (this repo, Actions read/write) and inputs.source=timer; timer and scheduled runs share a once-a-day guard so only the first one emails. GitHub cron kept as backup. Verified: timer test run reached GitHub at 12:28 and skipped correctly (no email, no log row). Probe removed. To confirm: first timer run 22 Oct 07:05.
 
 ## Findings Craig should see
 
