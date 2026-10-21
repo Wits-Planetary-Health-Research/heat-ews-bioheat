@@ -13,6 +13,10 @@ on:
         description: "Send email to test recipients only"
         type: boolean
         default: false
+      source:
+        description: "Leave blank. The external morning timer sets this to 'timer'."
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -44,7 +48,8 @@ jobs:
           SMTP_FROM: ${{ secrets.SMTP_FROM || secrets.SMTP_USER }}
           HEATEWS_PAGE_URL: ${{ vars.HEATEWS_PAGE_URL }}
           HEATEWS_TEST: ${{ inputs.test_email && '1' || '0' }}
-          HEATEWS_SCHEDULED: ${{ github.event_name == 'schedule' && '1' || '0' }}
+          # Scheduled and timer runs do the day's run once; later ones the same day skip
+          HEATEWS_SCHEDULED: ${{ (github.event_name == 'schedule' || inputs.source == 'timer') && '1' || '0' }}
           HEATEWS_RECIPIENTS: ${{ secrets.HEATEWS_RECIPIENTS }}
           HEATEWS_TEST_RECIPIENTS: ${{ secrets.HEATEWS_TEST_RECIPIENTS || secrets.SMTP_USER }}
         run: python -m heatews.run

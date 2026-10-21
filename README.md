@@ -33,6 +33,12 @@ Everything you'd want to change is in `config.yaml`. Edit it on GitHub (pencil i
 
 To run it straight away, go to Actions, pick "Daily heat alert" and press "Run workflow". Tick "test email" to send only to `HEATEWS_TEST_RECIPIENTS` (falls back to the sending Gmail address).
 
+## What starts it each morning
+
+GitHub's own schedule is unreliable: on 21 Oct 2026 it dropped the 07:13 and 08:17 slots and ran the 09:41 slot 2.5 hours late. So an outside timer (cron-job.org) starts the run at 07:05 SAST through GitHub's API, using a token that can only run this repo's workflows. GitHub's schedule stays on as a backup. Whichever starts first does the day's run, and the others that day stop without emailing.
+
+Timer settings: POST `https://api.github.com/repos/Wits-Planetary-Health-Research/heat-ews-bioheat/actions/workflows/daily.yml/dispatches`, headers `Accept: application/vnd.github+json`, `Authorization: Bearer <token>`, `X-GitHub-Api-Version: 2022-11-28`, body `{"ref":"main","inputs":{"source":"timer"}}`. A good call returns 204. The token is a fine-grained token on the Wits-Planetary-Health-Research org, this repo only, Actions read and write. It expires, so renew it before the expiry date.
+
 ## If it stops
 
 - The page says "System not updated": the forecast service didn't answer. It normally sorts itself out by the next day. If it lasts more than 2 days, check the Actions tab for the error.
