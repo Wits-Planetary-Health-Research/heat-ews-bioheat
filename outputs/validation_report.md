@@ -26,25 +26,25 @@ The two differ on hot days. On days ERA5 was above the threshold, quantile mappi
 
 ## 4. Can it see heatwaves coming?
 
-Hindcast, warm seasons 2024/25 and 2025/26, 484 issue days. The correction is trained on the other season each time. A heatwave is the SOP definition (2 or more consecutive days above the monthly P95), judged on the same 8-day window for forecast and ERA5.
+Hindcast, warm seasons 2024/25 and 2025/26, 484 issue days. The correction is trained on the other season each time. A heatwave is 2 or more consecutive days above the monthly P95 from ERA5 at RMMCH, 1991 to 2020 (switched from the SOP's Soweto 2016 to 2019 values on 21 Oct 2026), judged on the same 8-day window for forecast and ERA5.
 
 | Warning window | Heatwaves caught | Missed | False alarms | Hit rate | False-alarm ratio |
 |---|---|---|---|---|---|
-| Days 1 to 3 | 10 | 5 | 14 | 0.67 | 0.58 |
-| Days 4 to 7 | 15 | 5 | 29 | 0.75 | 0.66 |
-| Day 8 | 4 | 3 | 18 | 0.57 | 0.82 |
+| Days 1 to 3 | 24 | 2 | 25 | 0.92 | 0.51 |
+| Days 4 to 7 | 32 | 2 | 36 | 0.94 | 0.53 |
+| Day 8 | 14 | 2 | 21 | 0.88 | 0.60 |
 
-Activations per warm season over 1991 to 2025 are in `activations_per_season.csv` and `activation_scenarios.csv`.
+With these thresholds a warm season has about 3 heatwave events on average over 1991 to 2020, and about 4 since 2020 (`activations_per_season.csv`). On the old SOP values it was about 1, with half of seasons having none.
 
 ## 5. How far ahead can it be trusted
 
-A Warning for the coming week catches about 2 in 3 heatwaves. More than half of Warnings will not turn into a heatwave that meets the SOP definition. The forecast heat is usually there, just slightly short of the threshold or one day short of a 2-day run. By day 8 most alerts are false. Days 9 to 14 cannot be scored with open data, so Watch should be read as a heads-up to keep checking, and never as grounds to activate.
+A Warning for the coming week catches 9 in 10 heatwaves. About half of Warnings will not turn into a full heatwave, though the forecast heat is usually close. Day 8 is still useful. Days 9 to 14 cannot be scored with open data, so read Watch as a heads-up.
 
-In practice: use Warning to start getting ready (kits, sonographer bookings) and confirm with the next day's run before activating.
+In practice: use a Warning to start getting ready and confirm with the next day's run before activating.
 
 ## 6. Limits
 
-- The skill numbers rest on 15 to 20 heatwave windows over two seasons. Treat them as rough.
+- The skill numbers rest on about 30 heatwave windows over two seasons. Treat them as rough.
 - The hindcast uses the deterministic IFS run. The live system uses the median of the 51-member ensemble, which is smoother and may sit a little lower on hot days.
 - ERA5 smooths over a 25 km box. The hospital itself may run hotter, and the on-site station will show by how much.
-- The SOP thresholds come from four years for the neighbouring Soweto cell. See `D1_note.md`.
+- The SOP-BH-13 Appendix 1 values (four years, neighbouring Soweto cell) are no longer used for the alert. They can be switched back with `thresholds.source: sop`. See `D1_note.md`.

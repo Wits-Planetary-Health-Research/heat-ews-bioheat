@@ -17,11 +17,13 @@ class FetchError(RuntimeError):
     pass
 
 
-def fetch(lat, lon, model="ecmwf_ifs025", days=15, tz="Africa/Johannesburg", tries=6, session=None):
+def fetch(lat, lon, model="ecmwf_ifs025", days=15, tz="Africa/Johannesburg", tries=6, session=None, past_days=0):
     """Return (dates, members[n_members, n_days], meta). Raises FetchError on any failure."""
     get = (session or requests).get
     params = dict(latitude=lat, longitude=lon, hourly="temperature_2m", models=model,
                   forecast_days=days, timezone=tz)
+    if past_days:
+        params["past_days"] = past_days
     last = None
     for attempt in range(tries):
         try:

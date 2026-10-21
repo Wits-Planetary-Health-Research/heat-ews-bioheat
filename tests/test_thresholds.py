@@ -44,8 +44,15 @@ def test_leap_day_pooled_with_28_feb():
     assert list(T.doy365(["2004-02-28", "2004-02-29", "2004-03-01", "2005-03-01"])) == [59, 59, 60, 60]
 
 
-def test_operational_table_defaults_to_sop():
+def test_operational_table_uses_1991_2020_table():
     cfg = load()
     t = T.operational_table(cfg)
-    assert t[1] == 32.6 and t[9] == 30.5
-    assert list(T.for_dates(["2026-01-31", "2026-02-01"], cfg)) == [32.6, 29.8]
+    assert abs(t[1] - 30.0) < 0.05 and abs(t[10] - 31.4) < 0.05
+    assert abs(T.operational_table(cfg, pct=90)[1] - 29.2) < 0.05
+    assert [round(x, 1) for x in T.for_dates(["2026-10-31", "2026-11-01"], cfg)] == [31.4, 30.6]
+
+
+def test_sop_source_still_available():
+    cfg = load()
+    cfg["thresholds"]["source"] = "sop"
+    assert T.operational_table(cfg)[1] == 32.6

@@ -19,13 +19,14 @@ reanalysis:
   variable: temperature_2m_max
 
 thresholds:
-  percentile: 95          # SOP-BH-13 uses P95. Q3
-  also_report: [90]
-  reference_period: [2016, 2019]   # SOP-BH-13 period. Q4. WMO normal is [1991, 2020]
-  kind: monthly           # monthly (SOP) or calendar_day
+  # table: monthly values from table_file (default). sop: SOP-BH-13 Appendix 1. compute: from ERA5 on the fly
+  source: table
+  table_file: data/thresholds_rmmch_1991_2020.csv   # ERA5, RMMCH grid cell, 1991-2020 (WMO normal)
+  percentile: 95          # triggers the alert
+  also_show: 90           # drawn on the page for reference
+  reference_period: [1991, 2020]
+  kind: monthly           # monthly or calendar_day (compute only)
   calendar_window_days: 15
-  # When true, use the published SOP-BH-13 Appendix 1 values as the operational thresholds
-  use_sop_table: true
 
 sop_appendix1:
   # SOP-BH-13 Appendix 1, ERA5 Soweto 2016-2019, degrees C

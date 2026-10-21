@@ -22,7 +22,7 @@ NOW = datetime(2027, 1, 10, 6, 0, tzinfo=timezone(timedelta(hours=2)))
 
 
 def fake(values, n=51):
-    def f(lat, lon, model, days):
+    def f(lat, lon, model, days, **kw):
         dates = pd.date_range("2027-01-10", periods=days, freq="D")
         v = np.tile(np.asarray(values[:days], dtype=float), (n, 1))
         return dates, v, {"fetched_utc": "2027-01-10T04:00:00+00:00", "members": n}
@@ -69,7 +69,7 @@ def test_email_only_on_change(tmp_docs, monkeypatch):
     v = [25] * 15
     v[2] = v[3] = 34
     run.main(fetcher=fake(v), now=NOW)                  # change to Warning
-    assert len(sent) == 2 and sent[-1].endswith("Warning")
+    assert len(sent) == 2 and sent[-1].endswith("Heatwave expected in the next 7 days")
 
 
 def test_email_failure_does_not_crash():
@@ -118,3 +118,26 @@ def test_backup_slot_retries_after_failed_fetch(tmp_docs, monkeypatch):
     run.main(fetcher=failing, now=NOW)
     r = run.main(fetcher=fake([25] * 15), now=NOW + timedelta(hours=1))
     assert not r.get("skipped") and r["status"] == A.NO_ALERT
+
+
+def test_page_shows_chances_now_and_p90(tmp_docs):
+    v = [25] * 15
+    v[0] = v[1] = v[2] = 34
+    r = run.main(fetcher=fake(v), now=NOW)
+    html = (tmp_docs / "index.html").read_text()
+    assert r["status"] == A.WARNING
+    assert "Heatwave expected in the next 7 days" in html
+    assert "Chance of a heatwave, next 7 days" in html and "100%" in html
+    assert "Day 1, likely to last until Tue 12 Jan" in html
+    assert "P90" in html
+    assert json.loads((tmp_docs / "status.json").read_text())["heatwave_now"] is True
+
+
+def test_heatwave_now_uses_past_days(tmp_docs):
+    def f(lat, lon, model, days, **kw):
+        dates = pd.date_range("2027-01-08", periods=days + 2, freq="D")   # 2 past days + forecast
+        vals = [34, 34, 34] + [25] * (days - 1)
+        return dates, np.tile(np.asarray(vals, float), (51, 1)), {"fetched_utc": "x", "members": 51}
+    run.main(fetcher=f, now=NOW)
+    html = (tmp_docs / "index.html").read_text()
+    assert "Day 3, likely to last until Sun 10 Jan" in html

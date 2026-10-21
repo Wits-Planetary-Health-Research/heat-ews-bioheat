@@ -33,20 +33,24 @@ def should_send(prev, now, mode="on_change", today=None, daily_until=None):
     return prev != now
 
 
-def compose(result, issued, page_url, site):
+def compose(result, issued, page_url, site, current=None):
+    from .render import HEADLINE, MEANING
+    import pandas as pd
     s = result["status"]
     msg = EmailMessage()
-    msg["Subject"] = f"BioHEAT heat alert ({site}): {s}"
-    lines = [f"Status: {s}", f"Issued: {issued}", ""]
-    if s == A.WARNING:
-        lines.append("A heatwave (SOP-BH-13 definition) is forecast in the next 7 days. Please review and decide on activation.")
-    elif s == A.WATCH:
-        lines.append("A heatwave is possible in days 8 to 14. No action needed yet; keep an eye on the daily update.")
-    elif s == A.NO_ALERT:
-        lines.append("No heatwave is forecast in the next 14 days.")
-    else:
-        lines.append("Today's forecast could not be loaded. Please check the SAWS forecast manually today.")
-    lines += ["", f"Full forecast: {page_url}"]
+    msg["Subject"] = f"BioHEAT heat alert ({site}): {HEADLINE[s]}"
+    lines = [HEADLINE[s] + ".", MEANING[s], ""]
+    if s != A.NOT_UPDATED:
+        if current:
+            more = " or longer" if current.get("runs_past_forecast") else ""
+            lines.append(f"Heatwave now: yes, day {current['day_number']}, likely to last until "
+                         f"{pd.Timestamp(current['end']).strftime('%a %d %b')}{more}.")
+        else:
+            lines.append("Heatwave now: no.")
+        lines.append(f"Chance of a heatwave in the next 7 days: {round(result['frac_warning_window'] * 100)}%.")
+        lines.append(f"Chance of a heatwave in days 8 to 14: {round(result['frac_watch_window'] * 100)}%.")
+        lines.append("")
+    lines += [f"Issued {issued}.", f"Full forecast: {page_url}"]
     msg.set_content("\n".join(lines))
     return msg
 

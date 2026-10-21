@@ -35,24 +35,30 @@ def doy365(dates):
     return doy.values
 
 
-def for_dates(dates, cfg, table=None):
-    """Threshold that applies to each date, under the configured kind."""
+def for_dates(dates, cfg, table=None, pct=None):
+    """Threshold that applies to each date."""
     dates = pd.to_datetime(pd.Series(dates))
     th = cfg["thresholds"]
     if table is None:
-        table = operational_table(cfg)
-    if th["kind"] == "monthly":
+        table = operational_table(cfg, pct=pct)
+    if th.get("source", "table") != "compute" or th["kind"] == "monthly":
         return dates.dt.month.map(table).values
     return pd.Series(doy365(dates)).map(table).values
 
 
-def operational_table(cfg, df=None):
-    """Thresholds the alert uses. By default the published SOP-BH-13 Appendix 1 values."""
+def operational_table(cfg, df=None, pct=None):
+    """Monthly (or day-of-year) thresholds. pct defaults to the alert percentile."""
+    from .config import ROOT
     th = cfg["thresholds"]
-    if th.get("use_sop_table", False) and th["kind"] == "monthly":
-        return cfg["sop_appendix1"][f"p{th['percentile']}"]
+    pct = pct or th["percentile"]
+    src = th.get("source") or ("sop" if th.get("use_sop_table") else "compute")
+    if src == "sop":
+        return cfg["sop_appendix1"][f"p{pct}"]
+    if src == "table":
+        t = pd.read_csv(ROOT / th["table_file"])
+        return {int(m): float(v) for m, v in zip(t["month"], t[f"p{pct}"])}
     if df is None:
         raise ValueError("ERA5 data needed to compute thresholds")
     if th["kind"] == "monthly":
-        return monthly(df, th["reference_period"], th["percentile"]).to_dict()
-    return calendar_day(df, th["reference_period"], th["percentile"], th["calendar_window_days"]).to_dict()
+        return monthly(df, th["reference_period"], pct).to_dict()
+    return calendar_day(df, th["reference_period"], pct, th["calendar_window_days"]).to_dict()

@@ -111,3 +111,12 @@ def test_bias_methods():
     qm = bias.Mapping(t, "quantile_mapping")
     assert qm.correct([25.0], 0)[0] == pytest.approx(25.0)
     assert qm.correct([32.0], 0)[0] == pytest.approx(31.0)  # above training range: constant top shift
+
+
+def test_current_heatwave_day_and_end():
+    d = list(range(10))
+    med = [25, 34, 34, 34, 34, 25, 25, 25, 25, 25]
+    c = A.current_heatwave(d, med, [JAN] * 10, 2, CFG)
+    assert c["day_number"] == 2 and c["end"] == 4 and c["length_days"] == 4
+    assert A.current_heatwave(d, med, [JAN] * 10, 6, CFG) is None
+    assert A.current_heatwave(d, [25] + [34] * 9, [JAN] * 10, 3, CFG)["runs_past_forecast"]

@@ -78,3 +78,22 @@ def status(members, thresh, cfg):
     return {"status": s, "members": n, "median": median, "hw_median": hw_median,
             "member_prob_days": hw_members.mean(axis=0), "frac_warning_window": frac_warn,
             "frac_watch_window": frac_watch}
+
+
+def current_heatwave(dates, median, thresh, today_idx, cfg):
+    """Is a heatwave under way today? Uses recent past days plus the forecast median.
+
+    Returns None, or dict with start, end (last forecast heatwave day), day_number, length_days.
+    """
+    a = cfg["alert"]
+    hw = heatwave_days(hot_days(median, thresh, a["comparison"]), a["run_length_days"])
+    if today_idx >= len(hw) or not hw[today_idx]:
+        return None
+    i = today_idx
+    while i > 0 and hw[i - 1]:
+        i -= 1
+    j = today_idx
+    while j + 1 < len(hw) and hw[j + 1]:
+        j += 1
+    return {"start": dates[i], "end": dates[j], "day_number": today_idx - i + 1, "length_days": j - i + 1,
+            "runs_past_forecast": j == len(hw) - 1}
