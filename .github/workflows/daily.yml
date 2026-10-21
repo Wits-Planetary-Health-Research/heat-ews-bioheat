@@ -2,7 +2,11 @@ name: Daily heat alert
 
 on:
   schedule:
-    - cron: "13 5 * * *"   # 07:13 SAST every day
+    # GitHub can skip or delay scheduled runs, so there are three slots each morning.
+    # The first one that gets a good forecast does the day's run; later slots see that and stop.
+    - cron: "13 5 * * *"   # 07:13 SAST
+    - cron: "17 6 * * *"   # 08:17 SAST, backup
+    - cron: "41 7 * * *"   # 09:41 SAST, backup
   workflow_dispatch:
     inputs:
       test_email:
@@ -40,6 +44,7 @@ jobs:
           SMTP_FROM: ${{ secrets.SMTP_FROM || secrets.SMTP_USER }}
           HEATEWS_PAGE_URL: ${{ vars.HEATEWS_PAGE_URL }}
           HEATEWS_TEST: ${{ inputs.test_email && '1' || '0' }}
+          HEATEWS_SCHEDULED: ${{ github.event_name == 'schedule' && '1' || '0' }}
           HEATEWS_RECIPIENTS: ${{ secrets.HEATEWS_RECIPIENTS }}
           HEATEWS_TEST_RECIPIENTS: ${{ secrets.HEATEWS_TEST_RECIPIENTS || secrets.SMTP_USER }}
         run: python -m heatews.run

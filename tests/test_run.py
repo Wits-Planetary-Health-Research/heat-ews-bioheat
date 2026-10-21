@@ -100,3 +100,19 @@ def test_email_modes():
     assert notify.should_send("Watch", "Watch", "alerts", later, date(2026, 10, 27))   # alert day
     assert notify.should_send("Watch", "No alert", "alerts", later, None)              # change
     assert not notify.should_send("Watch", "Watch", "on_change", later, None)
+
+
+def test_backup_slot_skips_after_good_run(tmp_docs, monkeypatch):
+    monkeypatch.setenv("HEATEWS_SCHEDULED", "1")
+    sent = []
+    monkeypatch.setattr(run.notify, "send", lambda msg, rec: sent.append(1) or "sent")
+    run.main(fetcher=fake([25] * 15), now=NOW)                       # first slot runs
+    r = run.main(fetcher=fake([25] * 15), now=NOW + timedelta(hours=1))  # backup slot same day
+    assert r.get("skipped") and len(sent) == 1
+
+
+def test_backup_slot_retries_after_failed_fetch(tmp_docs, monkeypatch):
+    monkeypatch.setenv("HEATEWS_SCHEDULED", "1")
+    run.main(fetcher=failing, now=NOW)
+    r = run.main(fetcher=fake([25] * 15), now=NOW + timedelta(hours=1))
+    assert not r.get("skipped") and r["status"] == A.NO_ALERT

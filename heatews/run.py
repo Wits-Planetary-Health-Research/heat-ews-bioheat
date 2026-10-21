@@ -30,6 +30,10 @@ def main(cfg=None, fetcher=forecast.fetch, now=None):
     issued = now.strftime("%a %d %b %Y, %H:%M SAST")
     DOCS.mkdir(exist_ok=True)
     prev = json.loads(STATE.read_text()) if STATE.exists() else {}
+    today_str = now.date().isoformat()
+    if os.environ.get("HEATEWS_SCHEDULED") == "1" and prev.get("last_good_date") == today_str:
+        print(f"Already ran successfully today ({prev.get('last_good')}); backup slot skipped.")
+        return {"status": prev.get("status"), "skipped": True}
     site, fc, a = cfg["site"], cfg["forecast"], cfg["alert"]
     horizon = a["watch_days"][1]
     dates = members = th = None
@@ -66,7 +70,10 @@ def main(cfg=None, fetcher=forecast.fetch, now=None):
     if notify.should_send(prev.get("status"), result["status"], cfg["notify"]["mode"], now.date(), du) or test:
         email = notify.send(notify.compose(result, issued, PAGE_URL, site["name"]), recipients)
 
-    state = {"status": result["status"], "issued": issued, "last_good": last_good,
+    last_good_date = prev.get("last_good_date")
+    if result["status"] != A.NOT_UPDATED:
+        last_good_date = today_str
+    state = {"status": result["status"], "issued": issued, "last_good": last_good, "last_good_date": last_good_date,
              "reason": result.get("reason", ""), "frac_watch_window": result.get("frac_watch_window"),
              "frac_warning_window": result.get("frac_warning_window")}
     STATE.write_text(json.dumps(state, indent=1))

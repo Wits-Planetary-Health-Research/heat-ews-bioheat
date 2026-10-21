@@ -41,7 +41,7 @@ To run it straight away, go to Actions, pick "Daily heat alert" and press "Run w
 
 ## How it works
 
-1. Each day at 07:13 SAST, GitHub Actions fetches the latest ECMWF IFS ensemble (51 members, 0.25°) for the site from Open-Meteo, which serves ECMWF open data.
+1. Each morning GitHub Actions runs at 07:13 SAST, with backup slots at 08:17 and 09:41 because GitHub sometimes skips scheduled runs. The first slot that gets a good forecast does the day's work and the later ones stop. It fetches the latest ECMWF IFS ensemble (51 members, 0.25°) for the site from Open-Meteo, which serves ECMWF open data.
 2. Each member's hourly temperature becomes a daily maximum over the SAST day.
 3. Each forecast day is bias-corrected to ERA5 with a mean shift by lead time, fitted on past IFS forecasts (`data/bias_mapping.json`). The raw forecast runs about 1 °C cold. Days 9 to 14 use the lead 7 correction because there's no open archive past that.
 4. The thresholds are the SOP-BH-13 Appendix 1 values for each month.
