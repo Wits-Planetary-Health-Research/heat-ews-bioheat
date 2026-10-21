@@ -1,8 +1,9 @@
 {
  "status": "Watch",
- "issued": "Tue 20 Oct 2026, 21:57 SAST",
- "last_good": "Tue 20 Oct 2026, 21:57 SAST",
+ "issued": "Wed 21 Oct 2026, 11:09 SAST",
+ "last_good": "Wed 21 Oct 2026, 11:09 SAST",
+ "last_good_date": "2026-10-21",
  "reason": "",
- "frac_watch_window": 0.6078431372549019,
- "frac_warning_window": 0.058823529411764705
+ "frac_watch_window": 0.8431372549019608,
+ "frac_warning_window": 0.3137254901960784
 }

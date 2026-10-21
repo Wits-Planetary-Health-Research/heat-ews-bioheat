@@ -2,3 +2,4 @@ status,issued,last_good,reason,frac_watch_window,frac_warning_window,email
 No alert,"Tue 20 Oct 2026, 20:59 SAST","Tue 20 Oct 2026, 20:59 SAST",,0.27450980392156865,0.0,no recipients configured
 Watch,"Tue 20 Oct 2026, 21:55 SAST","Tue 20 Oct 2026, 21:55 SAST",,0.6078431372549019,0.058823529411764705,no recipients configured
 Watch,"Tue 20 Oct 2026, 21:57 SAST","Tue 20 Oct 2026, 21:57 SAST",,0.6078431372549019,0.058823529411764705,sent to 1
+Watch,"Wed 21 Oct 2026, 11:09 SAST","Wed 21 Oct 2026, 11:09 SAST",2026-10-21,,0.8431372549019608,0.3137254901960784,sent to 1
