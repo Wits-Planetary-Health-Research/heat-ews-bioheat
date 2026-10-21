@@ -77,8 +77,15 @@ def main(cfg=None, fetcher=forecast.fetch, now=None):
              "reason": result.get("reason", ""), "frac_watch_window": result.get("frac_watch_window"),
              "frac_warning_window": result.get("frac_warning_window")}
     STATE.write_text(json.dumps(state, indent=1))
-    row = pd.DataFrame([{**state, "email": email}])
-    row.to_csv(LOG, mode="a", header=not LOG.exists(), index=False)
+    row = pd.DataFrame([{**state, "email": email, "test_run": test, "recipient_count": len(recipients)}])
+    # Rewrite the whole log so new columns never misalign older rows
+    if LOG.exists():
+        try:
+            old_log = pd.read_csv(LOG, on_bad_lines="skip")
+        except Exception:
+            old_log = pd.DataFrame()
+        row = pd.concat([old_log, row], ignore_index=True)
+    row.to_csv(LOG, index=False)
     print(f"{issued}: {result['status']} ({email})")
     return result
 

@@ -6,6 +6,7 @@ Addresses are kept out of config.yaml because the repo is public. Config lists a
 """
 from email.message import EmailMessage
 import os
+import re
 import smtplib
 
 from . import alert as A
@@ -14,7 +15,8 @@ from . import alert as A
 def recipients(cfg, test=False, env=os.environ):
     key = "HEATEWS_TEST_RECIPIENTS" if test else "HEATEWS_RECIPIENTS"
     raw = env.get(key, "")
-    lst = [a.strip() for a in raw.replace(";", ",").split(",") if a.strip()]
+    # Accept commas, semicolons, spaces or new lines between addresses
+    lst = [a.strip() for a in re.split(r"[,;\s]+", raw) if "@" in a]
     return lst or list(cfg["notify"]["test_recipients" if test else "recipients"] or [])
 
 

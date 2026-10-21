@@ -87,6 +87,8 @@ def test_recipients_from_secret_env():
     assert notify.recipients(cfg, False, env) == ["a@x.org", "b@x.org", "c@x.org"]
     assert notify.recipients(cfg, True, env) == ["t@x.org"]
     assert notify.recipients(cfg, False, {}) == []
+    lines = {"HEATEWS_RECIPIENTS": "a@x.org\nb@x.org\n c@x.org \n"}
+    assert notify.recipients(cfg, False, lines) == ["a@x.org", "b@x.org", "c@x.org"]
 
 
 def test_email_modes():
