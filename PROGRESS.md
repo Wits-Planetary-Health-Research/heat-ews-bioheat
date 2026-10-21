@@ -68,6 +68,8 @@ C15 first pass looked weak (days 1-3 hit rate 0.22, FAR 0.60). The scoring took 
 
 **Iter 18 (22:15).** Recipients moved out of public config into the HEATEWS_RECIPIENTS secret (Craig, Ijeoma, Nic, Sam, Matthew; addresses taken from Outlook contact cards). Craig added the secret. 27 tests pass.
 
+**Iter 19 (21 Oct 08:50).** The 07:13 scheduled run did not fire on 21 Oct (no schedule event in the run list; workflow active). No emails went out. Added backup slots at 08:17 and 09:41 SAST with a same-day guard (30 tests pass). C14 run count restarts from the first scheduled run that fires.
+
 ## Findings Craig should see
 
 - Warnings will over-call: more than half of Warnings in days 1 to 7 won't meet the SOP definition, though they usually come close. Suggest Warning triggers preparation and the next day's run confirms activation. Worth putting to Ijeoma.
