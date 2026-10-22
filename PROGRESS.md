@@ -74,6 +74,8 @@ C15 first pass looked weak (days 1-3 hit rate 0.22, FAR 0.60). The scoring took 
 
 **Iter 21 (21 Oct 13:00).** Nic's feedback (email 21 Oct 11:46): drop the SOP Soweto thresholds for the 1991-2020 normal, keep P95 to trigger but show P90, make the page clearer (chance of a heatwave in the next 7 days, whether a heatwave is under way now and how long). Done: thresholds now `data/thresholds_rmmch_1991_2020.csv` (config `thresholds.source: table`, SOP still selectable); page and email lead with a plain headline and three figures (heatwave now with day and expected end, using the last 2 days plus the forecast; chance next 7 days; chance days 8 to 14); P90 line and column added. 34 tests pass. Hindcast rerun on the new thresholds: days 1-3 hit rate 0.92 (24/26), FAR 0.51; days 4-7 0.94, FAR 0.53; ~3 events per season 1991-2020. Validation report updated. Did not use the station login shared by email; asked about the ingestion API instead.
 
+**Iter 22 (22 Oct 07:52).** First timer run: cron-job.org started the workflow at 07:05:02 SAST, status Warning, email sent to 5 (not a test). GitHub's 07:13 schedule did not fire; on 21 Oct its 09:41 slot ran at 15:14 and correctly skipped. C14 day 1 of 7.
+
 ## Findings Craig should see
 
 - Warnings will over-call: more than half of Warnings in days 1 to 7 won't meet the SOP definition, though they usually come close. Suggest Warning triggers preparation and the next day's run confirms activation. Worth putting to Ijeoma.
