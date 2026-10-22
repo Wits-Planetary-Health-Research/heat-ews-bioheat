@@ -46,13 +46,15 @@ def test_leap_day_pooled_with_28_feb():
 
 def test_operational_table_uses_1991_2020_table():
     cfg = load()
-    t = T.operational_table(cfg)
+    assert cfg["thresholds"]["percentile"] == 90          # BioHEAT protocol
+    assert abs(T.operational_table(cfg)[10] - 30.3) < 0.05
+    t = T.operational_table(cfg, pct=95)
     assert abs(t[1] - 30.0) < 0.05 and abs(t[10] - 31.4) < 0.05
     assert abs(T.operational_table(cfg, pct=90)[1] - 29.2) < 0.05
-    assert [round(x, 1) for x in T.for_dates(["2026-10-31", "2026-11-01"], cfg)] == [31.4, 30.6]
+    assert [round(x, 1) for x in T.for_dates(["2026-10-31", "2026-11-01"], cfg)] == [30.3, 29.5]
 
 
 def test_sop_source_still_available():
     cfg = load()
     cfg["thresholds"]["source"] = "sop"
-    assert T.operational_table(cfg)[1] == 32.6
+    assert T.operational_table(cfg, pct=95)[1] == 32.6

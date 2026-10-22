@@ -22,8 +22,8 @@ thresholds:
   # table: monthly values from table_file (default). sop: SOP-BH-13 Appendix 1. compute: from ERA5 on the fly
   source: table
   table_file: data/thresholds_rmmch_1991_2020.csv   # ERA5, RMMCH grid cell, 1991-2020 (WMO normal)
-  percentile: 95          # triggers the alert
-  also_show: 90           # drawn on the page for reference
+  percentile: 90          # triggers the alert. BioHEAT protocol uses P90 (Ijeoma, 21 Oct 2026)
+  also_show: null         # e.g. 95 to draw a second line on the page
   reference_period: [1991, 2020]
   kind: monthly           # monthly or calendar_day (compute only)
   calendar_window_days: 15
@@ -36,9 +36,14 @@ sop_appendix1:
 alert:
   run_length_days: 2
   comparison: strict      # strict (>) per SOP example, or inclusive (>=)
-  warning_days: [1, 7]
+  warning_days: [1, 7]          # "next 7 days"
   watch_days: [8, 14]
-  watch_member_fraction: 0.5   # Q9
+  # Chance of a heatwave = share of the 51 ensemble members that show one in the window
+  activate_member_fraction: 0.8  # Activate: chance in days 1 to 7 at least this
+  prepare_member_fraction: 0.5   # Prepare: chance in days 1 to 7 at least this
+  watch_member_fraction: 0.5     # Watch: chance in days 8 to 14 at least this
+  likely_day_fraction: 0.5       # a day counts towards the expected heatwave dates at this chance
+  visit_days_after: 2            # SOP-BH-13 visit window: heatwave days plus up to 2 days after
   min_members: 40              # fewer than this counts as an incomplete fetch
 
 bias:

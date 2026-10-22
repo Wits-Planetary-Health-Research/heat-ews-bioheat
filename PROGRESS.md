@@ -76,6 +76,8 @@ C15 first pass looked weak (days 1-3 hit rate 0.22, FAR 0.60). The scoring took 
 
 **Iter 22 (22 Oct 07:52).** First timer run: cron-job.org started the workflow at 07:05:02 SAST, status Warning, email sent to 5 (not a test). GitHub's 07:13 schedule did not fire; on 21 Oct its 09:41 slot ran at 15:14 and correctly skipped. C14 day 1 of 7.
 
+**Iter 22 (22 Oct 14:10).** Ijeoma's feedback (emails 21 Oct 17:30 and 22 Oct 11:47): protocol now uses P90; trigger on the chance of reaching P90, not a higher threshold; add a pre-activation level; tie "check tomorrow" to the chance; add heatwave dates and visit window. Done: threshold P90 (1991-2020 RMMCH table). Levels from member share: Activate >= 80% in days 1 to 7, Prepare 50 to 79%, Watch >= 50% in days 8 to 14, No alert. Ensemble median no longer sets the level. Email and page now give expected heatwave dates (first run of days with >= 50% of members in a heatwave) and visit window (+2 days), a plain-language key for the levels, and no "ensemble" wording in the email. 40 tests pass. Dry run on the 22 Oct 14:07 forecast: Activate, 90%, heatwave Sun 25 to Mon 26 Oct, visits to Wed 28 Oct. Not yet scored in the hindcast: the open archive is deterministic IFS only, so the 80% member rule can't be checked against past forecasts.
+
 ## Findings Craig should see
 
 - Warnings will over-call: more than half of Warnings in days 1 to 7 won't meet the SOP definition, though they usually come close. Suggest Warning triggers preparation and the next day's run confirms activation. Worth putting to Ijeoma.

@@ -57,11 +57,63 @@ def _ens(day_values, n=50, noise=0.0, seed=0):
     return base + rng.normal(0, noise, size=(n, len(base))) if noise else np.tile(base, (n, 1))
 
 
-def test_straddle_day7_day8_counts_as_warning():
+def test_straddle_day7_day8_counts_in_next_7_days():
     temps = [25] * 14
     temps[6], temps[7] = 34, 34  # lead days 7 and 8
     r = A.status(_ens(temps), [JAN] * 14, CFG)
-    assert r["status"] == A.WARNING
+    assert r["status"] == A.ACTIVATE
+
+
+def test_activate_prepare_cutoffs():
+    temps = np.full((50, 14), 25.0)
+    temps[:40, 2:4] = 34  # 80% of members -> Activate
+    assert A.status(temps, [JAN] * 14, CFG)["status"] == A.ACTIVATE
+    temps = np.full((50, 14), 25.0)
+    temps[:39, 2:4] = 34  # 78% -> Prepare
+    assert A.status(temps, [JAN] * 14, CFG)["status"] == A.PREPARE
+    temps = np.full((50, 14), 25.0)
+    temps[:25, 2:4] = 34  # 50% -> Prepare
+    assert A.status(temps, [JAN] * 14, CFG)["status"] == A.PREPARE
+    temps[25:30, 2:4] = 34
+    temps = np.full((50, 14), 25.0)
+    temps[:24, 2:4] = 34  # 48% in days 1-7, nothing later -> No alert
+    assert A.status(temps, [JAN] * 14, CFG)["status"] == A.NO_ALERT
+
+
+def test_prepare_outranks_watch():
+    temps = np.full((50, 14), 25.0)
+    temps[:30, 2:4] = 34   # 60% next 7 days
+    temps[:, 9:11] = 34    # 100% days 8-14
+    assert A.status(temps, [JAN] * 14, CFG)["status"] == A.PREPARE
+
+
+def test_visit_window_is_heatwave_plus_two_days():
+    import pandas as pd
+    dates = pd.date_range("2027-01-10", periods=14)
+    temps = np.full((50, 14), 25.0)
+    temps[:45, 3:6] = 34   # lead days 4-6 hot in 90% of members
+    r = A.status(temps, [JAN] * 14, CFG)
+    e = A.expected_heatwave(dates, r, CFG)
+    assert e["start"] == pd.Timestamp("2027-01-13") and e["end"] == pd.Timestamp("2027-01-15")
+    assert e["days"] == 3 and e["visit_end"] == pd.Timestamp("2027-01-17") and not e["open_end"]
+
+
+def test_visit_window_unclear_when_timing_spread():
+    import pandas as pd
+    dates = pd.date_range("2027-01-10", periods=14)
+    temps = np.full((50, 14), 25.0)
+    for k in range(5):     # 5 groups of 10 members, each hot on different days -> no day above 50%
+        temps[k * 10:(k + 1) * 10, k:k + 2] = 34
+    r = A.status(temps, [JAN] * 14, CFG)
+    assert r["status"] == A.ACTIVATE
+    assert A.expected_heatwave(dates, r, CFG) is None
+
+
+def test_visit_window_uses_current_heatwave():
+    import pandas as pd
+    cur = {"start": pd.Timestamp("2027-01-08"), "end": pd.Timestamp("2027-01-11"), "runs_past_forecast": False}
+    e = A.expected_heatwave([], {}, CFG, cur)
+    assert e["start"] == pd.Timestamp("2027-01-08") and e["visit_end"] == pd.Timestamp("2027-01-13")
 
 
 def test_watch_from_members_in_days_8_14():

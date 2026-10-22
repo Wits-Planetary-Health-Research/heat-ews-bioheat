@@ -11,19 +11,60 @@ import pandas as pd
 
 from . import alert as A
 
-COLOURS = {A.WARNING: "#b42318", A.WATCH: "#b54708", A.NO_ALERT: "#3f6212", A.NOT_UPDATED: "#475467"}
+COLOURS = {A.ACTIVATE: "#b42318", A.PREPARE: "#c4320a", A.WATCH: "#b54708", A.NO_ALERT: "#3f6212",
+           A.NOT_UPDATED: "#475467"}
 HEADLINE = {
-    A.WARNING: "Heatwave expected in the next 7 days",
+    A.ACTIVATE: "Heatwave likely in the next 7 days",
+    A.PREPARE: "Heatwave possible in the next 7 days",
     A.WATCH: "Possible heatwave in 8 to 14 days",
     A.NO_ALERT: "No heatwave expected in the next 14 days",
     A.NOT_UPDATED: "Forecast not updated today",
 }
 MEANING = {
-    A.WARNING: "Start preparing for heatwave visits. Check tomorrow's update before the PI or designee decides on activation.",
+    A.ACTIVATE: "Activate heatwave visits (SOP-BH-13).",
+    A.PREPARE: ("Get ready: pull the list of participants who may need to be contacted. "
+                "Check tomorrow's update before activating."),
     A.WATCH: "No action yet. Keep an eye on the daily update.",
     A.NO_ALERT: "Nothing to do.",
-    A.NOT_UPDATED: "Today's forecast could not be loaded. Do not read this as 'no heatwave'. Check the SAWS forecast manually.",
+    A.NOT_UPDATED: ("Today's forecast could not be loaded. Do not read this as 'no heatwave'. "
+                    "Check the SAWS forecast manually."),
 }
+# One line per level, used as a key at the foot of the email and on the page
+LEVELS = [
+    (A.ACTIVATE, "chance of a heatwave in the next 7 days is {act}% or more. Activate heatwave visits."),
+    (A.PREPARE, "chance in the next 7 days is {prep}% to {act_less}%. Get the participant list ready and check tomorrow."),
+    (A.WATCH, "chance in days 8 to 14 is {watch}% or more. No action yet."),
+    (A.NO_ALERT, "none of the above."),
+]
+CHANCE_NOTE = ("ECMWF runs its forecast 51 times each day with slightly different starting conditions. "
+               "The chance is the share of those 51 runs that show a heatwave.")
+
+
+def level_key(cfg):
+    a = cfg["alert"]
+    act, prep, watch = (round(a[k] * 100) for k in
+                        ("activate_member_fraction", "prepare_member_fraction", "watch_member_fraction"))
+    return [(lvl, txt.format(act=act, prep=prep, act_less=act - 1, watch=watch)) for lvl, txt in LEVELS]
+
+
+def _d(x):
+    return pd.Timestamp(x).strftime("%a %d %b")
+
+
+def heatwave_lines(exp, current):
+    """Plain-text lines for the expected heatwave and visit window. Empty if no heatwave is in view."""
+    if current:
+        more = " or longer" if current.get("runs_past_forecast") else ""
+        now = (f"Heatwave now: yes, day {current['day_number']}, likely to last until "
+               f"{_d(current['end'])}{more}.")
+    else:
+        now = "Heatwave now: no."
+    if not exp:
+        return now, None, None
+    more = " or later" if exp["open_end"] else ""
+    when = f"{_d(exp['start'])} to {_d(exp['end'])}{more} ({exp['days']} days)"
+    visit = f"{_d(exp['visit_start'])} to {_d(exp['visit_end'])}{more}"
+    return now, when, visit
 
 
 def chart_svg(dates, members, thresh, comparison_label="P95", thresh90=None, label90="P90"):
@@ -56,19 +97,16 @@ def chart_svg(dates, members, thresh, comparison_label="P95", thresh90=None, lab
     return svg[svg.index("<svg"):]
 
 
-def _d(x):
-    return pd.Timestamp(x).strftime("%a %d %b")
-
-
 def page(result, issued, source, site_name, dates=None, members=None, thresh=None, last_good=None,
-         threshold_label="P95 by month", thresh90=None, current=None, also_pct=90):
+         threshold_label="P90 by month", thresh90=None, current=None, also_pct=None, cfg=None,
+         expected=None, pct=90):
     s = result["status"]
     colour = COLOURS[s]
     chart = ""
     rows = ""
     tiles = ""
     if s != A.NOT_UPDATED and members is not None:
-        chart = chart_svg(dates, members, thresh, "P95", thresh90, f"P{also_pct}")
+        chart = chart_svg(dates, members, thresh, f"P{pct}", thresh90, f"P{also_pct}")
         med = result["median"]
         prob = result["member_prob_days"]
         for k, d in enumerate(dates):
@@ -76,6 +114,7 @@ def page(result, issued, source, site_name, dates=None, members=None, thresh=Non
             t90 = f"<td>{thresh90[k]:.1f}</td>" if thresh90 is not None else ""
             rows += (f"<tr><td>{k + 1}</td><td>{_d(d)}</td><td>{med[k]:.1f}</td>"
                      f"<td>{thresh[k]:.1f}</td>{t90}<td>{prob[k] * 100:.0f}%</td><td>{flag}</td></tr>")
+        now_line, when, visit = heatwave_lines(expected, current)
         if current:
             more = " or longer" if current["runs_past_forecast"] else ""
             now_txt = (f"<b class='yes'>Yes</b>Day {current['day_number']}, likely to last until "
@@ -86,9 +125,15 @@ def page(result, issued, source, site_name, dates=None, members=None, thresh=Non
         p14 = round(result["frac_watch_window"] * 100)
         tiles = (f"<div class='tiles'><div class='tile'><span>Heatwave now?</span>{now_txt}</div>"
                  f"<div class='tile'><span>Chance of a heatwave, next 7 days</span><b>{p7}%</b></div>"
-                 f"<div class='tile'><span>Chance of a heatwave, days 8 to 14</span><b>{p14}%</b></div></div>"
-                 "<p class='note'>Chance is the share of the 51 ECMWF forecast versions that show at least "
-                 "2 days in a row above the threshold.</p>")
+                 f"<div class='tile'><span>Chance of a heatwave, days 8 to 14</span><b>{p14}%</b></div></div>")
+        if when and s in (A.ACTIVATE, A.PREPARE):
+            tiles += (f"<div class='visit'><div><span>Expected heatwave</span>{escape(when)}</div>"
+                      f"<div><span>Visit window</span>{escape(visit)}</div></div>")
+        elif s in (A.ACTIVATE, A.PREPARE):
+            tiles += "<p class='note'>Heatwave dates not clear yet. Check tomorrow's update.</p>"
+        tiles += f"<p class='note'>{escape(CHANCE_NOTE)}</p>"
+    key = "".join(f"<tr><td>{escape(l)}</td><td>{escape(t[0].upper() + t[1:])}</td></tr>"
+                  for l, t in level_key(cfg)) if cfg else ""
     extra = ""
     if s == A.NOT_UPDATED:
         extra = f"<p class='note'>Reason: {escape(result.get('reason', 'unknown'))}. Last good run: {escape(last_good or 'none')}.</p>"
@@ -96,7 +141,7 @@ def page(result, issued, source, site_name, dates=None, members=None, thresh=Non
     if rows:
         h90 = f"<th>P{also_pct} °C</th>" if thresh90 is not None else ""
         table = ("<h2>Day by day</h2><div class='scroll'><table><thead><tr><th>Day</th><th>Date</th>"
-                 f"<th>Median Tmax °C</th><th>Threshold (P95) °C</th>{h90}<th>Chance this day is in a heatwave</th>"
+                 f"<th>Median Tmax °C</th><th>Threshold (P{pct}) °C</th>{h90}<th>Chance this day is in a heatwave</th>"
                  f"<th></th></tr></thead><tbody>{rows}</tbody></table></div>")
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -115,6 +160,10 @@ h1 {{ font-size:1.15rem; margin:0 0 4px; }} h2 {{ font-size:1rem; margin:24px 0 
 .tile span {{ display:block; color:var(--muted); font-size:.8rem; }}
 .tile b {{ display:block; font-size:1.5rem; }}
 .tile b.yes {{ color:#b42318; }}
+.visit {{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:8px; margin:8px 0;
+         border:1px solid {colour}; padding:10px 12px; }}
+.visit span {{ display:block; color:var(--muted); font-size:.8rem; }}
+.key td {{ white-space:normal; vertical-align:top; }} .key td:first-child {{ font-weight:600; white-space:nowrap; }}
 svg {{ width:100%; height:auto; }}
 .scroll {{ overflow-x:auto; }}
 table {{ border-collapse:collapse; font-size:.85rem; width:100%; }}
@@ -127,10 +176,10 @@ th, td {{ border-bottom:1px solid var(--line); padding:6px 8px; text-align:left;
 {tiles}
 {chart}
 {table}
-<h2>How this works</h2>
+<h2>What the levels mean</h2>
+<table class="key"><tbody>{key}</tbody></table>
 <p class="note">A heatwave is daily maximum temperature above the monthly threshold ({escape(threshold_label)}) on at least 2
-consecutive days. Warning: the ensemble median meets this within days 1 to 7.
-Watch: at least half of the ensemble members meet it within days 8 to 14. The forecast is the ECMWF ensemble,
-bias-corrected to ERA5. Forecasts beyond about a week are uncertain; the PI or designee decides on activation.</p>
+consecutive days. Heatwave visits run on the heatwave days and up to 2 days after. The forecast is ECMWF's,
+corrected to match the local record (ERA5). Forecasts beyond about a week are uncertain.</p>
 <p class="note">Data: {escape(source)}</p>
 </body></html>"""

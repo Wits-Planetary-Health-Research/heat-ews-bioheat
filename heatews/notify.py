@@ -22,34 +22,39 @@ def recipients(cfg, test=False, env=os.environ):
 
 def should_send(prev, now, mode="on_change", today=None, daily_until=None):
     """mode: on_change (only when the status changes), alerts (on change, and every day while there is a
-    Watch or Warning), daily_digest (every day). daily_until (a date) forces a daily email up to and
+    Watch, Prepare or Activate), daily_digest (every day). daily_until (a date) forces a daily email up to and
     including that day, whatever the mode."""
     if daily_until is not None and today is not None and today <= daily_until:
         return True
     if mode == "daily_digest":
         return True
-    if mode == "alerts" and now in (A.WARNING, A.WATCH):
+    if mode == "alerts" and now in A.ALERT_LEVELS:
         return True
     return prev != now
 
 
-def compose(result, issued, page_url, site, current=None):
-    from .render import HEADLINE, MEANING
-    import pandas as pd
+def compose(result, issued, page_url, site, current=None, expected=None, cfg=None):
+    from .render import CHANCE_NOTE, HEADLINE, MEANING, heatwave_lines, level_key
     s = result["status"]
     msg = EmailMessage()
-    msg["Subject"] = f"BioHEAT heat alert ({site}): {HEADLINE[s]}"
-    lines = [HEADLINE[s] + ".", MEANING[s], ""]
+    subject = {A.ACTIVATE: "Activate heatwave visits", A.PREPARE: "Get ready, heatwave possible"}.get(s, HEADLINE[s])
+    msg["Subject"] = f"BioHEAT heat alert ({site}): {subject}"
+    lines = [f"{s.upper()}: {HEADLINE[s]}.", MEANING[s], ""]
     if s != A.NOT_UPDATED:
-        if current:
-            more = " or longer" if current.get("runs_past_forecast") else ""
-            lines.append(f"Heatwave now: yes, day {current['day_number']}, likely to last until "
-                         f"{pd.Timestamp(current['end']).strftime('%a %d %b')}{more}.")
-        else:
-            lines.append("Heatwave now: no.")
-        lines.append(f"Chance of a heatwave in the next 7 days: {round(result['frac_warning_window'] * 100)}%.")
-        lines.append(f"Chance of a heatwave in days 8 to 14: {round(result['frac_watch_window'] * 100)}%.")
-        lines.append("")
+        now_line, when, visit = heatwave_lines(expected, current)
+        if s in (A.ACTIVATE, A.PREPARE):
+            if when:
+                lines += [f"Expected heatwave: {when}", f"Visit window: {visit}", ""]
+            else:
+                lines += ["Heatwave dates not clear yet. Check tomorrow's update.", ""]
+        lines.append(now_line)
+        lines.append(f"Chance of a heatwave in the next 7 days: {round(result['frac_warning_window'] * 100)}%")
+        lines.append(f"Chance of a heatwave in days 8 to 14: {round(result['frac_watch_window'] * 100)}%")
+        lines += ["", CHANCE_NOTE, ""]
+        if cfg:
+            lines.append("Levels:")
+            lines += [f"{lvl}: {txt}" for lvl, txt in level_key(cfg)]
+            lines.append("")
     lines += [f"Issued {issued}.", f"Full forecast: {page_url}"]
     msg.set_content("\n".join(lines))
     return msg

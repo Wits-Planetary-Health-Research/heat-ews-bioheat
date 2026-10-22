@@ -6,14 +6,17 @@ It does the forecast check in SOP-BH-13 ("person X or automated"). It does not d
 
 ## What the statuses mean
 
-| Status | Meaning | What to do |
+The chance of a heatwave is the share of ECMWF's 51 daily forecast runs that show one.
+
+| Status | When | What to do |
 |---|---|---|
-| Warning | A heatwave is forecast within days 1 to 7 | Start SOP-BH-13 preparations. Check the next day's run, then ask the PI or designee to decide on activation |
-| Watch | At least half the ensemble shows a heatwave in days 8 to 14 | No action yet. Check the page each day |
-| No alert | No heatwave forecast in the next 14 days | Nothing |
+| Activate | Chance of a heatwave in the next 7 days is 80% or more | Activate heatwave visits (SOP-BH-13). The email gives the expected heatwave dates and the visit window |
+| Prepare | Chance in the next 7 days is 50% to 79% | Pull the list of participants who may need to be contacted. Check tomorrow's update before activating |
+| Watch | Chance in days 8 to 14 is 50% or more | No action yet. Check the page each day |
+| No alert | None of the above | Nothing |
 | System not updated | Today's forecast didn't load | Don't read this as "no heatwave". Check the SAWS forecast by hand and tell Craig or Sam |
 
-A heatwave is daily maximum temperature **above** the monthly 95th percentile (SOP-BH-13 Appendix 1) on at least 2 consecutive days. A day exactly at the threshold doesn't count, as in the SOP's worked example.
+A heatwave is daily maximum temperature **above** the monthly 90th percentile (ERA5, 1991 to 2020, RMMCH grid cell) on at least 2 consecutive days, as in the BioHEAT protocol. A day exactly at the threshold doesn't count, as in the SOP's worked example. The visit window is the heatwave days plus 2 days after. Expected heatwave dates are the first run of days on which at least half the forecast runs show a heatwave; when the runs disagree on timing, the email says the dates aren't clear yet.
 
 ## Where to see it
 
@@ -26,10 +29,11 @@ Everything you'd want to change is in `config.yaml`. Edit it on GitHub (pencil i
 
 - Add or remove an email recipient: the list is the `HEATEWS_RECIPIENTS` secret (Settings, Secrets and variables, Actions), comma-separated. GitHub doesn't show a secret's value, so click the pencil and paste the whole new list. Addresses aren't kept in `config.yaml` because the repo is public.
 - Change the run length: `alert.run_length_days` (SOP says 2).
-- Switch from P95 to P90: set `thresholds.percentile: 90`. With `use_sop_table: true` it uses the Appendix 1 P90 column.
+- Switch between P90 and P95: `thresholds.percentile` (90 now, per the protocol). `thresholds.source: sop` uses SOP-BH-13 Appendix 1 instead.
 - Use thresholds computed from a different period: set `use_sop_table: false` and set `reference_period`, for example `[1991, 2020]`. You'll need to rerun `make era5` first.
 - Count a day exactly at the threshold as hot: `alert.comparison: inclusive`.
-- Change the Watch cut-off: `alert.watch_member_fraction` (0.5 is half the members).
+- Change the cut-offs: `alert.activate_member_fraction` (0.8), `alert.prepare_member_fraction` (0.5), `alert.watch_member_fraction` (0.5).
+- Change the visit window: `alert.visit_days_after` (SOP says 2).
 
 To run it straight away, go to Actions, pick "Daily heat alert" and press "Run workflow". Tick "test email" to send only to `HEATEWS_TEST_RECIPIENTS` (falls back to the sending Gmail address).
 
@@ -50,8 +54,8 @@ Timer settings: POST `https://api.github.com/repos/Wits-Planetary-Health-Researc
 1. Each morning GitHub Actions runs at 07:13 SAST, with backup slots at 08:17 and 09:41 because GitHub sometimes skips scheduled runs. The first slot that gets a good forecast does the day's work and the later ones stop. It fetches the latest ECMWF IFS ensemble (51 members, 0.25°) for the site from Open-Meteo, which serves ECMWF open data.
 2. Each member's hourly temperature becomes a daily maximum over the SAST day.
 3. Each forecast day is bias-corrected to ERA5 with a mean shift by lead time, fitted on past IFS forecasts (`data/bias_mapping.json`). The raw forecast runs about 1 °C cold. Days 9 to 14 use the lead 7 correction because there's no open archive past that.
-4. The thresholds are the SOP-BH-13 Appendix 1 values for each month.
-5. Warning if the ensemble median shows a heatwave in days 1 to 7. Watch if at least half the members show one in days 8 to 14.
+4. The thresholds are the monthly P90 from ERA5 1991 to 2020 at RMMCH (`data/thresholds_rmmch_1991_2020.csv`).
+5. Each of the 51 members is checked for a heatwave. The share that has one in days 1 to 7 sets Activate or Prepare; the share in days 8 to 14 sets Watch.
 
 ## Rebuild from scratch
 

@@ -69,7 +69,7 @@ def test_email_only_on_change(tmp_docs, monkeypatch):
     v = [25] * 15
     v[2] = v[3] = 34
     run.main(fetcher=fake(v), now=NOW)                  # change to Warning
-    assert len(sent) == 2 and sent[-1].endswith("Heatwave expected in the next 7 days")
+    assert len(sent) == 2 and sent[-1].endswith("Activate heatwave visits")
 
 
 def test_email_failure_does_not_crash():
@@ -126,7 +126,8 @@ def test_page_shows_chances_now_and_p90(tmp_docs):
     r = run.main(fetcher=fake(v), now=NOW)
     html = (tmp_docs / "index.html").read_text()
     assert r["status"] == A.WARNING
-    assert "Heatwave expected in the next 7 days" in html
+    assert "Heatwave likely in the next 7 days" in html
+    assert "Visit window" in html and "Sun 10 Jan to Thu 14 Jan" in html
     assert "Chance of a heatwave, next 7 days" in html and "100%" in html
     assert "Day 1, likely to last until Tue 12 Jan" in html
     assert "P90" in html
@@ -141,3 +142,17 @@ def test_heatwave_now_uses_past_days(tmp_docs):
     run.main(fetcher=f, now=NOW)
     html = (tmp_docs / "index.html").read_text()
     assert "Day 3, likely to last until Sun 10 Jan" in html
+
+
+def test_email_body_has_dates_visit_window_and_key(tmp_docs, monkeypatch):
+    bodies = []
+    monkeypatch.setattr(run.notify, "send", lambda msg, rec: bodies.append(msg.get_content()) or "sent")
+    v = [25] * 15
+    v[3] = v[4] = v[5] = 34
+    run.main(fetcher=fake(v), now=NOW)
+    b = bodies[-1]
+    assert b.startswith("ACTIVATE: Heatwave likely in the next 7 days.")
+    assert "Expected heatwave: Wed 13 Jan to Fri 15 Jan (3 days)" in b
+    assert "Visit window: Wed 13 Jan to Sun 17 Jan" in b
+    assert "Prepare: chance in the next 7 days is 50% to 79%" in b
+    assert "ensemble" not in b.lower()

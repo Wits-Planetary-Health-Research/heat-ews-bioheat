@@ -36,7 +36,7 @@ def main(cfg=None, fetcher=forecast.fetch, now=None):
         return {"status": prev.get("status"), "skipped": True}
     site, fc, a = cfg["site"], cfg["forecast"], cfg["alert"]
     horizon = a["watch_days"][1]
-    dates = members = th = th90 = current = None
+    dates = members = th = th90 = current = expected = None
     pct, also = cfg["thresholds"]["percentile"], cfg["thresholds"].get("also_show")
     src = cfg["thresholds"].get("source", "table")
     th_label = (f"P{pct} by month, SOP-BH-13 Appendix 1" if src == "sop"
@@ -68,6 +68,7 @@ def main(cfg=None, fetcher=forecast.fetch, now=None):
             seq_med = np.concatenate([np.nanmedian(past_c, axis=0) if past_c.shape[1] else np.array([]),
                                       result["median"]])
             current = A.current_heatwave(seq_dates, seq_med, T.for_dates(seq_dates, cfg), len(dates_past), cfg)
+            expected = A.expected_heatwave(dates, result, cfg, current)
         source += f"; fetched {meta['fetched_utc']} UTC, {meta['members']} members"
     except forecast.FetchError as e:
         result = {"status": A.NOT_UPDATED, "reason": str(e)}
@@ -76,7 +77,8 @@ def main(cfg=None, fetcher=forecast.fetch, now=None):
     if result["status"] != A.NOT_UPDATED:
         last_good = issued
     html = render.page(result, issued, source, site["name"], dates, members, th, last_good,
-                       threshold_label=th_label, thresh90=th90, current=current, also_pct=also)
+                       threshold_label=th_label, thresh90=th90, current=current, also_pct=also, cfg=cfg,
+                       expected=expected, pct=pct)
     (DOCS / "index.html").write_text(html)
 
     test = os.environ.get("HEATEWS_TEST") == "1"
@@ -85,7 +87,7 @@ def main(cfg=None, fetcher=forecast.fetch, now=None):
     du = cfg["notify"].get("daily_until")
     du = pd.Timestamp(du).date() if du else None
     if notify.should_send(prev.get("status"), result["status"], cfg["notify"]["mode"], now.date(), du) or test:
-        email = notify.send(notify.compose(result, issued, PAGE_URL, site["name"], current), recipients)
+        email = notify.send(notify.compose(result, issued, PAGE_URL, site["name"], current, expected, cfg), recipients)
 
     last_good_date = prev.get("last_good_date")
     if result["status"] != A.NOT_UPDATED:
@@ -93,7 +95,10 @@ def main(cfg=None, fetcher=forecast.fetch, now=None):
     state = {"status": result["status"], "issued": issued, "last_good": last_good, "last_good_date": last_good_date,
              "reason": result.get("reason", ""), "frac_watch_window": result.get("frac_watch_window"),
              "frac_warning_window": result.get("frac_warning_window"),
-             "heatwave_now": bool(current)}
+             "heatwave_now": bool(current),
+             "heatwave_start": expected["start"].date().isoformat() if expected else None,
+             "heatwave_end": expected["end"].date().isoformat() if expected else None,
+             "visit_end": expected["visit_end"].date().isoformat() if expected else None}
     STATE.write_text(json.dumps(state, indent=1))
     row = pd.DataFrame([{**state, "email": email, "test_run": test, "recipient_count": len(recipients)}])
     # Rewrite the whole log so new columns never misalign older rows
