@@ -1,9 +1,10 @@
 {
- "status": "Watch",
- "issued": "Wed 21 Oct 2026, 11:09 SAST",
- "last_good": "Wed 21 Oct 2026, 11:09 SAST",
- "last_good_date": "2026-10-21",
+ "status": "Warning",
+ "issued": "Thu 22 Oct 2026, 07:05 SAST",
+ "last_good": "Thu 22 Oct 2026, 07:05 SAST",
+ "last_good_date": "2026-10-22",
  "reason": "",
- "frac_watch_window": 0.8431372549019608,
- "frac_warning_window": 0.3137254901960784
+ "frac_watch_window": 0.9803921568627451,
+ "frac_warning_window": 0.6078431372549019,
+ "heatwave_now": false
 }
