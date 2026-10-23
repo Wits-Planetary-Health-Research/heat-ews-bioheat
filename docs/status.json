@@ -1,10 +1,13 @@
 {
- "status": "Warning",
- "issued": "Thu 22 Oct 2026, 07:05 SAST",
- "last_good": "Thu 22 Oct 2026, 07:05 SAST",
- "last_good_date": "2026-10-22",
+ "status": "Activate",
+ "issued": "Fri 23 Oct 2026, 07:05 SAST",
+ "last_good": "Fri 23 Oct 2026, 07:05 SAST",
+ "last_good_date": "2026-10-23",
  "reason": "",
- "frac_watch_window": 0.9803921568627451,
- "frac_warning_window": 0.6078431372549019,
- "heatwave_now": false
+ "frac_watch_window": 0.8627450980392157,
+ "frac_warning_window": 0.9019607843137255,
+ "heatwave_now": false,
+ "heatwave_start": "2026-10-25",
+ "heatwave_end": "2026-10-26",
+ "visit_end": "2026-10-28"
 }
