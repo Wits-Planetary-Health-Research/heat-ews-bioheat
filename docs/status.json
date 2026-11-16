@@ -1,9 +1,9 @@
 {
  "status": "System not updated",
- "issued": "Sun 15 Nov 2026, 16:58 SAST",
+ "issued": "Mon 16 Nov 2026, 07:05 SAST",
  "last_good": "Sat 14 Nov 2026, 07:05 SAST",
  "last_good_date": "2026-11-14",
- "reason": "forecast covers 13 days, need 14",
+ "reason": "forecast covers 12 days, need 14",
  "frac_watch_window": null,
  "frac_warning_window": null,
  "heatwave_now": false,
