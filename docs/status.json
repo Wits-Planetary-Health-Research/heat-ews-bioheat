@@ -1,13 +1,13 @@
 {
- "status": "System not updated",
- "issued": "Mon 16 Nov 2026, 07:05 SAST",
- "last_good": "Sat 14 Nov 2026, 07:05 SAST",
- "last_good_date": "2026-11-14",
- "reason": "forecast covers 12 days, need 14",
- "frac_watch_window": null,
- "frac_warning_window": null,
+ "status": "Prepare",
+ "issued": "Mon 16 Nov 2026, 15:37 SAST",
+ "last_good": "Mon 16 Nov 2026, 15:37 SAST",
+ "last_good_date": "2026-11-16",
+ "reason": "",
+ "frac_watch_window": 0.37254901960784315,
+ "frac_warning_window": 0.7843137254901961,
  "heatwave_now": false,
- "heatwave_start": null,
- "heatwave_end": null,
- "visit_end": null
+ "heatwave_start": "2026-11-20",
+ "heatwave_end": "2026-11-21",
+ "visit_end": "2026-11-23"
 }
