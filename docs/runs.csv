@@ -32,4 +32,5 @@ System not updated,"Sun 15 Nov 2026, 14:43 SAST","Sat 14 Nov 2026, 07:05 SAST",2
 System not updated,"Sun 15 Nov 2026, 16:04 SAST","Sat 14 Nov 2026, 07:05 SAST",2026-11-14,"forecast covers 13 days, need 14",,,not needed,0.0,8.0,False,,,
 System not updated,"Sun 15 Nov 2026, 16:58 SAST","Sat 14 Nov 2026, 07:05 SAST",2026-11-14,"forecast covers 13 days, need 14",,,not needed,0.0,8.0,False,,,
 System not updated,"Mon 16 Nov 2026, 07:05 SAST","Sat 14 Nov 2026, 07:05 SAST",2026-11-14,"forecast covers 12 days, need 14",,,not needed,0.0,8.0,False,,,
-Prepare,"Mon 16 Nov 2026, 15:37 SAST","Mon 16 Nov 2026, 15:37 SAST",2026-11-16,,0.37254901960784315,0.7843137254901961,sent to 8,0.0,8.0,False,2026-11-20,2026-11-21,2026-11-23
+Prepare,"Mon 16 Nov 2026, 15:37 SAST","Mon 16 Nov 2026, 15:37 SAST",2026-11-16,,0.3725490196078431,0.7843137254901961,sent to 8,0.0,8.0,False,2026-11-20,2026-11-21,2026-11-23
+Prepare,"Tue 17 Nov 2026, 07:05 SAST","Tue 17 Nov 2026, 07:05 SAST",2026-11-17,,0.3333333333333333,0.5882352941176471,sent to 8,0.0,8.0,False,2026-11-20,2026-11-20,2026-11-22
