@@ -1,13 +1,13 @@
 {
- "status": "Prepare",
- "issued": "Tue 17 Nov 2026, 07:05 SAST",
- "last_good": "Tue 17 Nov 2026, 07:05 SAST",
- "last_good_date": "2026-11-17",
+ "status": "No alert",
+ "issued": "Wed 18 Nov 2026, 07:05 SAST",
+ "last_good": "Wed 18 Nov 2026, 07:05 SAST",
+ "last_good_date": "2026-11-18",
  "reason": "",
- "frac_watch_window": 0.3333333333333333,
- "frac_warning_window": 0.5882352941176471,
+ "frac_watch_window": 0.45098039215686275,
+ "frac_warning_window": 0.13725490196078433,
  "heatwave_now": false,
- "heatwave_start": "2026-11-20",
- "heatwave_end": "2026-11-20",
- "visit_end": "2026-11-22"
+ "heatwave_start": null,
+ "heatwave_end": null,
+ "visit_end": null
 }
